@@ -18,7 +18,7 @@
     "fmt": "deno fmt",
     "fmt:check": "deno fmt --check",
     "lint": "deno lint",
-    "test": "deno test -A tests/",
+    "test": "deno test --node-modules-dir=none -A tests/",
     "ci": "deno task fmt:check && deno task lint && deno task check && deno task test"
   },
   "fmt": {
