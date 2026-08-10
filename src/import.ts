@@ -15,7 +15,9 @@ export function createImportRdfTool(client: ImportRdfClientInterface) {
   return tool({
     description: IMPORT_RDF_TOOL_DESCRIPTION,
     parameters: z.object({
-      content: z.string().describe("RDF content payload to import into the graph."),
+      content: z.string().describe(
+        "RDF content payload to import into the graph.",
+      ),
       format: z
         .enum(["turtle", "ntriples", "nquads", "json-ld"])
         .default("turtle")
@@ -29,12 +31,16 @@ export function createImportRdfTool(client: ImportRdfClientInterface) {
           return { success: true, data: res };
         }
         if (typeof client.sparql === "function") {
-          const graphClause = request.graphUri ? `INTO GRAPH <${request.graphUri}>` : "";
+          const graphClause = request.graphUri
+            ? `INTO GRAPH <${request.graphUri}>`
+            : "";
           const query = `INSERT DATA { ${graphClause} { ${request.content} } }`;
           const res = await client.sparql({ query });
           return { success: true, data: res };
         }
-        throw new Error("Client does not support RDF import or SPARQL updates.");
+        throw new Error(
+          "Client does not support RDF import or SPARQL updates.",
+        );
       } catch (error) {
         return {
           success: false,

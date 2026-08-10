@@ -18,7 +18,9 @@ export function createExportRdfTool(client: ExportRdfClientInterface) {
         .enum(["turtle", "ntriples", "nquads", "json-ld"])
         .default("turtle")
         .describe("Requested export format."),
-      graphUri: z.string().optional().describe("Target named graph URI to export."),
+      graphUri: z.string().optional().describe(
+        "Target named graph URI to export.",
+      ),
     }),
     execute: async (request) => {
       try {
@@ -27,8 +29,11 @@ export function createExportRdfTool(client: ExportRdfClientInterface) {
           return { success: true, data: res };
         }
         if (typeof client.sparql === "function") {
-          const graphClause = request.graphUri ? `FROM <${request.graphUri}>` : "";
-          const query = `CONSTRUCT { ?s ?p ?o } ${graphClause} WHERE { ?s ?p ?o }`;
+          const graphClause = request.graphUri
+            ? `FROM <${request.graphUri}>`
+            : "";
+          const query =
+            `CONSTRUCT { ?s ?p ?o } ${graphClause} WHERE { ?s ?p ?o }`;
           const res = await client.sparql({ query });
           return { success: true, data: res.data };
         }

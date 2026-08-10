@@ -3,7 +3,9 @@ import { z } from "zod";
 import { EXECUTE_SPARQL_TOOL_DESCRIPTION } from "./descriptions.ts";
 
 export interface SparqlClientInterface {
-  sparql(request: { query: string; baseIri?: string; timeoutMs?: number }): Promise<{
+  sparql(
+    request: { query: string; baseIri?: string; timeoutMs?: number },
+  ): Promise<{
     kind: string;
     data?: unknown;
   }>;
@@ -28,7 +30,9 @@ export function createExecuteSparqlTool(
         "The SPARQL query string to execute. By default, only read-only queries (SELECT, ASK, CONSTRUCT, DESCRIBE) are allowed.",
       ),
       baseIri: z.string().optional().describe("Base IRI for query execution."),
-      timeoutMs: z.number().optional().describe("Query timeout in milliseconds."),
+      timeoutMs: z.number().optional().describe(
+        "Query timeout in milliseconds.",
+      ),
     }),
     execute: async (request) => {
       const allowUpdates = options?.allowUpdates ?? false;
