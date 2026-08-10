@@ -31,14 +31,17 @@ const tools = createTools({
 const { text } = await generateText({
   model: openai("gpt-4o"),
   tools,
-  prompt: "Find all entities in the knowledge base and describe their relations.",
+  prompt:
+    "Find all entities in the knowledge base and describe their relations.",
 });
 ```
 
 ## Included Tools
 
-- `executeSparql`: Execute SPARQL queries against the graph (read-only by default).
-- `searchWorld` / `searchEntities`: Vector and semantic search against knowledge graphs.
+- `executeSparql`: Execute SPARQL queries against the graph (read-only by
+  default).
+- `searchWorld` / `searchEntities`: Vector and semantic search against knowledge
+  graphs.
 - `discoverSchema`: Explore ontology classes and predicate relations.
 - `importRdf`: Import RDF triples into a world graph.
 - `exportRdf`: Export RDF triples from a world graph.

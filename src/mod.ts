@@ -4,9 +4,18 @@ import {
   type SparqlClientInterface,
 } from "./sparql.ts";
 import { createSearchWorldTool, type SearchClientInterface } from "./search.ts";
-import { createDiscoverSchemaTool, type DiscoverSchemaOptions } from "./schema.ts";
-import { createImportRdfTool, type ImportRdfClientInterface } from "./import.ts";
-import { createExportRdfTool, type ExportRdfClientInterface } from "./export.ts";
+import {
+  createDiscoverSchemaTool,
+  type DiscoverSchemaOptions,
+} from "./schema.ts";
+import {
+  createImportRdfTool,
+  type ImportRdfClientInterface,
+} from "./import.ts";
+import {
+  createExportRdfTool,
+  type ExportRdfClientInterface,
+} from "./export.ts";
 
 export * from "./descriptions.ts";
 export * from "./sparql.ts";
@@ -16,14 +25,16 @@ export * from "./import.ts";
 export * from "./export.ts";
 
 export interface CreateToolsConfig {
-  client?: SparqlClientInterface &
-    SearchClientInterface &
-    ImportRdfClientInterface &
-    ExportRdfClientInterface;
-  worlds?: SparqlClientInterface &
-    SearchClientInterface &
-    ImportRdfClientInterface &
-    ExportRdfClientInterface;
+  client?:
+    & SparqlClientInterface
+    & SearchClientInterface
+    & ImportRdfClientInterface
+    & ExportRdfClientInterface;
+  worlds?:
+    & SparqlClientInterface
+    & SearchClientInterface
+    & ImportRdfClientInterface
+    & ExportRdfClientInterface;
   sources?: string[];
   sparqlOptions?: ExecuteSparqlOptions;
   schemaOptions?: DiscoverSchemaOptions;

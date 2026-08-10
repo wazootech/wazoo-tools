@@ -1,6 +1,7 @@
 # @wazoo/tools Agent Guide
 
-This repository contains Vercel AI SDK integration tools for Wazoo and Worlds platforms.
+This repository contains Vercel AI SDK integration tools for Wazoo and Worlds
+platforms.
 
 ## Commands
 
