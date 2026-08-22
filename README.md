@@ -16,13 +16,13 @@ bunx jsr add @wazoo/tools
 ```typescript
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
-import { Sdk } from "@worlds/sdk";
-import { MemoryStore, WazooSparqlEngine } from "@wazoo/sparql-engine";
+import { WorldsSdk } from "@worlds/sdk";
+import { WazooSparqlEngine, MemoryStore } from "@wazoo/sparql-engine";
 import { RdfjsQuadStore, RdfjsSearchIndex } from "@worlds/sdk/rdfjs";
 import { createTools } from "@wazoo/tools";
 
 const store = new MemoryStore();
-const worlds = new Sdk({
+const worlds = new WorldsSdk({
   quadStore: new RdfjsQuadStore({ store }),
   searchIndex: new RdfjsSearchIndex(store),
   sparqlEngine: new WazooSparqlEngine({ store }),
