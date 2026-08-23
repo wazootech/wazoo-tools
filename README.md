@@ -17,7 +17,7 @@ bunx jsr add @wazoo/tools
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { WorldsSdk } from "@worlds/sdk";
-import { WazooSparqlEngine, MemoryStore } from "@wazoo/sparql-engine";
+import { MemoryStore, WazooSparqlEngine } from "@wazoo/sparql-engine";
 import { RdfjsQuadStore, RdfjsSearchIndex } from "@worlds/sdk/rdfjs";
 import { createTools } from "@wazoo/tools";
 
