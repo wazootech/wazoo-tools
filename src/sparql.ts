@@ -28,7 +28,7 @@ export function createExecuteSparqlTool(
 ) {
   return tool({
     description: EXECUTE_SPARQL_TOOL_DESCRIPTION,
-    parameters: z.object({
+    inputSchema: z.object({
       query: z.string().describe(
         "The SPARQL query string to execute. Read-only queries (SELECT, ASK, CONSTRUCT, DESCRIBE) are allowed by default.",
       ),

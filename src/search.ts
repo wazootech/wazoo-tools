@@ -14,7 +14,7 @@ export function createSearchWorldTool(
 ) {
   return tool({
     description: SEARCH_WORLD_TOOL_DESCRIPTION,
-    parameters: z.object({
+    inputSchema: z.object({
       query: z.string().describe(
         "Keyword, label, or natural-language query to search within the graph.",
       ),

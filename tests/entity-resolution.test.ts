@@ -149,7 +149,7 @@ Deno.test("createResolveEntityTool exposes resolve, lookup, merge, and stats", a
       name: "Melanie",
       scopedUrn: "urn:person:s1/melanie",
     },
-    { toolCallId: "1", messages: [] },
+    { toolCallId: "1", messages: [], context: {} },
   ) as { success: boolean; data?: { id: string } };
 
   assertEquals(resolved.success, true);
@@ -157,7 +157,7 @@ Deno.test("createResolveEntityTool exposes resolve, lookup, merge, and stats", a
   // @ts-ignore testing tool execution directly
   const looked = await tool.execute!(
     { operation: "lookup", id: resolved.data!.id },
-    { toolCallId: "2", messages: [] },
+    { toolCallId: "2", messages: [], context: {} },
   ) as { success: boolean; data?: { name: string } };
   assertEquals(looked.success, true);
   assertEquals(looked.data!.name, "Melanie");
@@ -165,14 +165,14 @@ Deno.test("createResolveEntityTool exposes resolve, lookup, merge, and stats", a
   // @ts-ignore testing tool execution directly
   const stats = await tool.execute!(
     { operation: "stats" },
-    { toolCallId: "3", messages: [] },
+    { toolCallId: "3", messages: [], context: {} },
   ) as { success: boolean; data?: { entities: number } };
   assertEquals(stats.data!.entities, 1);
 
   // @ts-ignore testing tool execution directly
   const bad = await tool.execute!(
     { operation: "resolve" },
-    { toolCallId: "4", messages: [] },
+    { toolCallId: "4", messages: [], context: {} },
   ) as { success: boolean; error?: string };
   assertEquals(bad.success, false);
 });

@@ -7,6 +7,16 @@ import { createImportRdfTool } from "./import.ts";
 import { createExportRdfTool } from "./export.ts";
 import { createResolveEntityTool } from "./entity-resolution-tool.ts";
 
+export { createExecuteSparqlTool } from "./sparql.ts";
+export { createSearchWorldTool } from "./search.ts";
+export {
+  createDiscoverSchemaTool,
+  type DiscoverSchemaOptions,
+} from "./schema.ts";
+export { createImportRdfTool } from "./import.ts";
+export { createExportRdfTool } from "./export.ts";
+export { createResolveEntityTool } from "./entity-resolution-tool.ts";
+
 /**
  * CreateToolsConfig defines the configuration options for the AI SDK tools.
  */
