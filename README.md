@@ -29,7 +29,7 @@ const worlds = new WorldsSdk({
 });
 
 const tools = createTools({
-  worlds,
+  client: worlds,
   sources: ["my-world"],
 });
 
