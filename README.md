@@ -49,6 +49,13 @@ const { text } = await generateText({
 - `createAdministrativeTools`: RDF import/export, `reindexWorld`, writable
   SPARQL when explicitly enabled, and optional `resolveEntity`.
 
+`searchWorld` supports optional two-stage retrieval: pass `searchOptions.rerank`
+with a caller-supplied AI SDK `RerankingModel` (e.g.
+`cohere.reranking("rerank-v3.5")`) to recall generously, reorder with the
+cross-encoder, and cut to `topN`. A reranker failure degrades ordering, not the
+tool call. The reranking model is caller-supplied, so no provider dependency is
+bundled here.
+
 The full surface is intentionally available as a one-size-fits-all starting
 point. Phase-specific factories prevent recall agents from seeing mutation and
 identity-management capabilities they should not invoke.
