@@ -54,8 +54,9 @@ export function createExecuteSparqlTool(
         const response = await client.sparql(request);
         return {
           success: true,
-          data:
-            response.kind === "void" ? null : (response as { data?: unknown }).data,
+          data: response.kind === "void"
+            ? null
+            : (response as { data?: unknown }).data,
         };
       } catch (error) {
         return {

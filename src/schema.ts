@@ -25,6 +25,7 @@ export function createDiscoverSchemaTool(
   client: WorldsSdkInterface,
   options?: DiscoverSchemaOptions,
 ) {
+  const graphUris = options?.sources ?? [];
   return tool({
     description: DISCOVER_SCHEMA_TOOL_DESCRIPTION,
     parameters: z.object({
@@ -34,13 +35,15 @@ export function createDiscoverSchemaTool(
         .describe("Optional target graph URI to introspect."),
     }),
     execute: async (request: { graphUri?: string }) => {
+      const graphUri = request.graphUri ?? graphUris[0];
+      const graphClause = graphUri ? `GRAPH <${graphUri}> {` : "";
+      const graphClose = graphUri ? "}" : "";
       const query = `
         SELECT DISTINCT ?type ?predicate WHERE {
-          ${request.graphUri ? `GRAPH <${request.graphUri}> {` : ""}
+          ${graphClause}
           ?subject a ?type ;
                    ?predicate ?object .
-          ${request.graphUri ? "" : ""}
-          ${request.graphUri ? "}" : ""}
+          ${graphClose}
         } LIMIT 100
       `;
       try {
