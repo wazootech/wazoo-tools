@@ -16,7 +16,7 @@
     "@worlds/sdk": "jsr:@worlds/sdk@^0.9.0",
     "@worlds/sdk/search-index": "jsr:@worlds/sdk@^0.9.0/search-index",
     "@worlds/sdk/quad-store": "jsr:@worlds/sdk@^0.9.0/quad-store",
-    "@wazoo/sparql-engine": "jsr:@wazoo/sparql-engine@^0.4.1",
+    "@worlds/sdk/sparql-engine": "jsr:@worlds/sdk@^0.9.0/sparql-engine",
     "@rdfjs/types": "npm:@rdfjs/types@^2.0.1"
   },
   "tasks": {

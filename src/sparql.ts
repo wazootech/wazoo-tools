@@ -1,5 +1,5 @@
 import { tool } from "ai";
-import type { SparqlRequest, SparqlResponse } from "@wazoo/sparql-engine";
+import type { SparqlRequest, SparqlResponse } from "@worlds/sdk/sparql-engine";
 import { EXECUTE_SPARQL_TOOL_DESCRIPTION } from "./descriptions.ts";
 import { z } from "zod";
 
