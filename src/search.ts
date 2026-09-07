@@ -1,5 +1,5 @@
 import { tool } from "ai";
-import type { SearchRequest, QuadFilter } from "@worlds/sdk/search-index";
+import type { SearchRequest } from "@worlds/sdk/search-index";
 import { SEARCH_WORLD_TOOL_DESCRIPTION } from "./descriptions.ts";
 import { z } from "zod";
 

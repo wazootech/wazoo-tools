@@ -48,8 +48,8 @@ const { text } = await generateText({
 - `searchWorld` / `searchEntities`: Vector and semantic search against knowledge
   graphs.
 - `discoverSchema`: Explore ontology classes and predicate relations.
-- `resolveEntity`: Cross-session entity resolution — map candidate names
-  (with optional embeddings) to stable canonical IDs, absorbing aliases
+- `resolveEntity`: Cross-session entity resolution — map candidate names (with
+  optional embeddings) to stable canonical IDs, absorbing aliases
   (`EntityResolver` is exported standalone for non-agent use).
 - `importRdf`: Import RDF triples into a world graph.
 - `exportRdf`: Export RDF triples from a world graph.

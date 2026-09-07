@@ -2,7 +2,7 @@ import type { WorldsSdkInterface } from "@worlds/sdk";
 import type { EntityResolver } from "./entity-resolution.ts";
 import { createExecuteSparqlTool } from "./sparql.ts";
 import { createSearchWorldTool } from "./search.ts";
-import { createDiscoverSchemaTool, type DiscoverSchemaOptions } from "./schema.ts";
+import { createDiscoverSchemaTool } from "./schema.ts";
 import { createImportRdfTool } from "./import.ts";
 import { createExportRdfTool } from "./export.ts";
 import { createResolveEntityTool } from "./entity-resolution-tool.ts";
