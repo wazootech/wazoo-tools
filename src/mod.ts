@@ -12,6 +12,8 @@ import {
   createImportRdfTool,
   type ImportRdfClientInterface,
 } from "./import.ts";
+import { createResolveEntityTool } from "./entity-resolution-tool.ts";
+import { type EntityResolver } from "./entity-resolution.ts";
 import {
   createExportRdfTool,
   type ExportRdfClientInterface,
@@ -23,6 +25,8 @@ export * from "./search.ts";
 export * from "./schema.ts";
 export * from "./import.ts";
 export * from "./export.ts";
+export * from "./entity-resolution.ts";
+export { createResolveEntityTool } from "./entity-resolution-tool.ts";
 
 export interface CreateToolsConfig {
   client?:
@@ -38,6 +42,8 @@ export interface CreateToolsConfig {
   sources?: string[];
   sparqlOptions?: ExecuteSparqlOptions;
   schemaOptions?: DiscoverSchemaOptions;
+  /** When provided alongside `client`/`worlds`, a resolveEntity tool is added. */
+  entityResolver?: EntityResolver;
 }
 
 /**
@@ -62,5 +68,8 @@ export function createTools(config: CreateToolsConfig) {
     }),
     importRdf: createImportRdfTool(targetClient),
     exportRdf: createExportRdfTool(targetClient),
+    ...(config.entityResolver
+      ? { resolveEntity: createResolveEntityTool(config.entityResolver) }
+      : {}),
   };
 }
