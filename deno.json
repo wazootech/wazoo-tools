@@ -11,7 +11,12 @@
   },
   "imports": {
     "ai": "npm:ai@^4.0.0",
-    "zod": "npm:zod@^3.22.0"
+    "zod": "npm:zod@^3.22.0",
+    "@worlds/sdk": "jsr:@worlds/sdk@^0.9.0",
+    "@worlds/sdk/search-index": "jsr:@worlds/sdk@^0.9.0/search-index",
+    "@worlds/sdk/quad-store": "jsr:@worlds/sdk@^0.9.0/quad-store",
+    "@wazoo/sparql-engine": "jsr:@wazoo/sparql-engine@^0.4.1",
+    "@rdfjs/types": "npm:@rdfjs/types@^2.0.1"
   },
   "tasks": {
     "check": "deno check src/mod.ts",
@@ -28,7 +33,9 @@
   },
   "lint": {
     "rules": {
-      "tags": ["recommended"]
+      "tags": [
+        "recommended"
+      ]
     }
   }
 }

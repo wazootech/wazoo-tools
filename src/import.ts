@@ -1,46 +1,48 @@
 import { tool } from "ai";
-import { z } from "zod";
+import type { ImportRequest } from "@worlds/sdk/quad-store";
 import { IMPORT_RDF_TOOL_DESCRIPTION } from "./descriptions.ts";
+import { z } from "zod";
 
-export interface ImportRdfClientInterface {
-  importRdf?(request: {
-    content: string;
-    format?: string;
-    graphUri?: string;
-  }): Promise<unknown>;
-  sparql?(request: { query: string }): Promise<unknown>;
-}
-
-export function createImportRdfTool(client: ImportRdfClientInterface) {
+/**
+ * createImportRdfTool creates an AI SDK tool for importing RDF data into a Worlds SDK client.
+ *
+ * @param client The Worlds SDK client instance.
+ * @returns An AI SDK tool for importing RDF data.
+ */
+export function createImportRdfTool(
+  client: { import(request: ImportRequest): Promise<void> },
+) {
   return tool({
     description: IMPORT_RDF_TOOL_DESCRIPTION,
     parameters: z.object({
-      content: z.string().describe(
-        "RDF content payload to import into the graph.",
+      mode: z.enum(["merge", "replace"]).optional().describe(
+        "Mode of import (defaults to 'merge').",
       ),
-      format: z
-        .enum(["turtle", "ntriples", "nquads", "json-ld"])
-        .default("turtle")
-        .describe("Format of the RDF payload."),
-      graphUri: z.string().optional().describe("Target named graph URI."),
+      source: z.object({
+        kind: z.literal("serialized").describe(
+          "The kind of data source. Always use 'serialized'.",
+        ),
+        data: z.string().describe("The serialized RDF data to import."),
+        contentType: z.string().optional().describe(
+          "The MIME type of the data. Usually 'text/turtle' or 'application/n-triples'.",
+        ),
+      }),
     }),
-    execute: async (request) => {
+    execute: async (request: { mode?: "merge" | "replace"; source: { kind: "serialized"; data: string; contentType?: string } }) => {
       try {
-        if (typeof client.importRdf === "function") {
-          const res = await client.importRdf(request);
-          return { success: true, data: res };
-        }
-        if (typeof client.sparql === "function") {
-          const graphClause = request.graphUri
-            ? `INTO GRAPH <${request.graphUri}>`
-            : "";
-          const query = `INSERT DATA { ${graphClause} { ${request.content} } }`;
-          const res = await client.sparql({ query });
-          return { success: true, data: res };
-        }
-        throw new Error(
-          "Client does not support RDF import or SPARQL updates.",
-        );
+        const importRequest: ImportRequest = {
+          mode: request.mode ?? "merge",
+          source: {
+            kind: "serialized",
+            data: request.source.data,
+            contentType: request.source.contentType,
+          },
+        };
+        await client.import(importRequest);
+        return {
+          success: true,
+          message: "Data imported successfully.",
+        };
       } catch (error) {
         return {
           success: false,

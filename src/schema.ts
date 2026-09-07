@@ -1,14 +1,28 @@
 import { tool } from "ai";
-import { z } from "zod";
+import type { SparqlRequest } from "@wazoo/sparql-engine";
+import type { WorldsSdkInterface } from "@worlds/sdk";
 import { DISCOVER_SCHEMA_TOOL_DESCRIPTION } from "./descriptions.ts";
-import type { SparqlClientInterface } from "./sparql.ts";
+import { z } from "zod";
 
+/**
+ * DiscoverSchemaOptions defines the configuration options for the discoverSchema tool.
+ */
 export interface DiscoverSchemaOptions {
+  /**
+   * sources defines the list of graph URIs to introspect.
+   */
   sources?: string[];
 }
 
+/**
+ * createDiscoverSchemaTool creates an AI SDK tool for discovering the schema of a Worlds SDK client.
+ *
+ * @param client The Worlds SDK client instance.
+ * @param options Configuration options for the tool.
+ * @returns An AI SDK tool for discovering the schema.
+ */
 export function createDiscoverSchemaTool(
-  client: SparqlClientInterface,
+  client: WorldsSdkInterface,
   options?: DiscoverSchemaOptions,
 ) {
   return tool({
@@ -19,22 +33,21 @@ export function createDiscoverSchemaTool(
         .optional()
         .describe("Optional target graph URI to introspect."),
     }),
-    execute: async (request) => {
+    execute: async (request: { graphUri?: string }) => {
       const query = `
         SELECT DISTINCT ?type ?predicate WHERE {
           ${request.graphUri ? `GRAPH <${request.graphUri}> {` : ""}
           ?subject a ?type ;
                    ?predicate ?object .
+          ${request.graphUri ? "" : ""}
           ${request.graphUri ? "}" : ""}
         } LIMIT 100
       `;
-
       try {
-        const response = await client.sparql({ query });
+        const response = await client.sparql({ query } as SparqlRequest);
         return {
           success: true,
-          sources: options?.sources ?? [],
-          data: response.data,
+          data: response,
         };
       } catch (error) {
         return {

@@ -1,73 +1,60 @@
-import {
-  createExecuteSparqlTool,
-  type ExecuteSparqlOptions,
-  type SparqlClientInterface,
-} from "./sparql.ts";
-import { createSearchWorldTool, type SearchClientInterface } from "./search.ts";
-import {
-  createDiscoverSchemaTool,
-  type DiscoverSchemaOptions,
-} from "./schema.ts";
-import {
-  createImportRdfTool,
-  type ImportRdfClientInterface,
-} from "./import.ts";
+import type { WorldsSdkInterface } from "@worlds/sdk";
+import type { EntityResolver } from "./entity-resolution.ts";
+import { createExecuteSparqlTool } from "./sparql.ts";
+import { createSearchWorldTool } from "./search.ts";
+import { createDiscoverSchemaTool, type DiscoverSchemaOptions } from "./schema.ts";
+import { createImportRdfTool } from "./import.ts";
+import { createExportRdfTool } from "./export.ts";
 import { createResolveEntityTool } from "./entity-resolution-tool.ts";
-import { type EntityResolver } from "./entity-resolution.ts";
-import {
-  createExportRdfTool,
-  type ExportRdfClientInterface,
-} from "./export.ts";
 
-export * from "./descriptions.ts";
-export * from "./sparql.ts";
-export * from "./search.ts";
-export * from "./schema.ts";
-export * from "./import.ts";
-export * from "./export.ts";
-export * from "./entity-resolution.ts";
-export { createResolveEntityTool } from "./entity-resolution-tool.ts";
-
+/**
+ * CreateToolsConfig defines the configuration options for the AI SDK tools.
+ */
 export interface CreateToolsConfig {
-  client?:
-    & SparqlClientInterface
-    & SearchClientInterface
-    & ImportRdfClientInterface
-    & ExportRdfClientInterface;
-  worlds?:
-    & SparqlClientInterface
-    & SearchClientInterface
-    & ImportRdfClientInterface
-    & ExportRdfClientInterface;
+  /**
+   * client is the Worlds SDK client instance to use for all tools.
+   */
+  client?: WorldsSdkInterface;
+
+  /**
+   * sparqlOptions defines configuration overrides for the executeSparql tool.
+   */
+  sparqlOptions?: { allowUpdates?: boolean };
+
+  /**
+   * sources defines the list of graph URIs to introspect for the discoverSchema tool.
+   */
   sources?: string[];
-  sparqlOptions?: ExecuteSparqlOptions;
-  schemaOptions?: DiscoverSchemaOptions;
-  /** When provided alongside `client`/`worlds`, a resolveEntity tool is added. */
+
+  /**
+   * entityResolver defines the entity resolution layer to use for the resolveEntity tool.
+   */
   entityResolver?: EntityResolver;
 }
 
 /**
- * Factory function creating a full suite of Vercel AI SDK compatible tools
- * for interacting with Wazoo/Worlds knowledge graphs.
+ * createTools creates AI SDK compatible tools that interact with a Worlds SDK client.
+ *
+ * @param config The configuration for the tools.
+ * @returns An object containing the AI SDK tools.
  */
 export function createTools(config: CreateToolsConfig) {
-  const targetClient = config.client ?? config.worlds;
-  if (!targetClient) {
+  const client = config.client;
+  if (!client) {
     throw new Error(
-      "createTools requires either a 'client' or 'worlds' client instance.",
+      "createTools requires a 'client' property of type WorldsSdkInterface.",
     );
   }
 
   return {
-    executeSparql: createExecuteSparqlTool(targetClient, config.sparqlOptions),
-    searchWorld: createSearchWorldTool(targetClient),
-    searchEntities: createSearchWorldTool(targetClient),
-    discoverSchema: createDiscoverSchemaTool(targetClient, {
+    executeSparql: createExecuteSparqlTool(client, config.sparqlOptions),
+    searchWorld: createSearchWorldTool(client),
+    searchEntities: createSearchWorldTool(client),
+    discoverSchema: createDiscoverSchemaTool(client, {
       sources: config.sources,
-      ...config.schemaOptions,
     }),
-    importRdf: createImportRdfTool(targetClient),
-    exportRdf: createExportRdfTool(targetClient),
+    importRdf: createImportRdfTool(client),
+    exportRdf: createExportRdfTool(client),
     ...(config.entityResolver
       ? { resolveEntity: createResolveEntityTool(config.entityResolver) }
       : {}),
