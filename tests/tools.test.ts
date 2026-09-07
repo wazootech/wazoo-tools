@@ -4,7 +4,7 @@ import {
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { createExecuteSparqlTool, createTools } from "../src/mod.ts";
 import type { WorldsSdkInterface } from "@worlds/sdk";
-import type { SparqlResponse } from "@wazoo/sparql-engine";
+import type { SparqlResponse } from "@worlds/sdk/sparql-engine";
 import type {
   SearchRequest,
   SearchResponse,

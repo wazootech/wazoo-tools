@@ -1,5 +1,5 @@
 import { tool } from "ai";
-import type { SparqlRequest } from "@wazoo/sparql-engine";
+import type { SparqlRequest } from "@worlds/sdk/sparql-engine";
 import type { WorldsSdkInterface } from "@worlds/sdk";
 import { DISCOVER_SCHEMA_TOOL_DESCRIPTION } from "./descriptions.ts";
 import { z } from "zod";

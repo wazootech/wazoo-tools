@@ -2,16 +2,9 @@
   "version": "5",
   "specifiers": {
     "jsr:@std/encoding@^1.0.10": "1.0.11",
-    "jsr:@std/internal@^1.0.14": "1.0.14",
-    "jsr:@std/path@^1.1.5": "1.1.6",
     "jsr:@wazoo/sparql-engine@~0.4.1": "0.4.1",
-    "jsr:@worlds/client@0.1": "0.1.0",
     "jsr:@worlds/sdk@0.9": "0.9.0",
     "npm:@ai-sdk/provider@^4.0.10": "4.0.10",
-    "npm:@rdfjs/types@^2.0.1": "2.0.1",
-    "npm:@tensorflow/tfjs-backend-wasm@^4.22.0": "4.22.0_@tensorflow+tfjs-core@4.22.0",
-    "npm:@tensorflow/tfjs@^4.22.0": "4.22.0_seedrandom@3.0.5",
-    "npm:ai@^6.0.195": "6.0.271_zod@4.5.4",
     "npm:ai@^7.0.93": "7.0.93_zod@4.5.4",
     "npm:zod@^3.22.0": "3.25.76",
     "npm:zod@^4.4.3": "4.5.4"
@@ -20,35 +13,14 @@
     "@std/encoding@1.0.11": {
       "integrity": "e7cef2f0b3153bccc17431e7c864a1de03a4b6d9647389c43e08aaa775d37385"
     },
-    "@std/internal@1.0.14": {
-      "integrity": "291516b3d4c35024d6ffbc0a9df5bf4c64116e05b50012cf846710152d2ffdf7"
-    },
-    "@std/path@1.1.6": {
-      "integrity": "c68485c2a4dfbb5ae3cc74fae4e8c4e5d874cf8a8ed12927917235c758b46cbe",
-      "dependencies": [
-        "jsr:@std/internal"
-      ]
-    },
     "@wazoo/sparql-engine@0.4.1": {
-      "integrity": "6881bda5e45aaf8bac2cd87f8b43db5db51d307fccbffc1cd4edaa46454f9bd7",
-      "dependencies": [
-        "npm:@rdfjs/types"
-      ]
-    },
-    "@worlds/client@0.1.0": {
-      "integrity": "0f55a9cdeb6316417233129e9fa000c92d79739b7317a8e1a33704cf2bb2b458"
+      "integrity": "6881bda5e45aaf8bac2cd87f8b43db5db51d307fccbffc1cd4edaa46454f9bd7"
     },
     "@worlds/sdk@0.9.0": {
       "integrity": "85a37343e8384c5a0f856fe5dda6866c0d18ece7ce0911582ee57aa6bb13b42a",
       "dependencies": [
         "jsr:@std/encoding",
-        "jsr:@std/path",
-        "jsr:@wazoo/sparql-engine",
-        "jsr:@worlds/client",
-        "npm:@rdfjs/types",
-        "npm:@tensorflow/tfjs",
-        "npm:@tensorflow/tfjs-backend-wasm",
-        "npm:ai@^6.0.195"
+        "jsr:@wazoo/sparql-engine"
       ]
     }
   },
@@ -568,7 +540,6 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@wazoo/sparql-engine@~0.4.1",
       "jsr:@worlds/sdk@0.9",
       "npm:@ai-sdk/provider@^4.0.10",
       "npm:@rdfjs/types@^2.0.1",
