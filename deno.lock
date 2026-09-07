@@ -7,6 +7,7 @@
     "jsr:@wazoo/sparql-engine@~0.4.1": "0.4.1",
     "jsr:@worlds/client@0.1": "0.1.0",
     "jsr:@worlds/sdk@0.9": "0.9.0",
+    "npm:@ai-sdk/provider@^4.0.10": "4.0.10",
     "npm:@rdfjs/types@^2.0.1": "2.0.1",
     "npm:@tensorflow/tfjs-backend-wasm@^4.22.0": "4.22.0_@tensorflow+tfjs-core@4.22.0",
     "npm:@tensorflow/tfjs@^4.22.0": "4.22.0_seedrandom@3.0.5",
@@ -569,6 +570,7 @@
     "dependencies": [
       "jsr:@wazoo/sparql-engine@~0.4.1",
       "jsr:@worlds/sdk@0.9",
+      "npm:@ai-sdk/provider@^4.0.10",
       "npm:@rdfjs/types@^2.0.1",
       "npm:ai@^7.0.93",
       "npm:zod@^4.4.3"
