@@ -28,7 +28,7 @@ export function createDiscoverSchemaTool(
   const graphUris = options?.sources ?? [];
   return tool({
     description: DISCOVER_SCHEMA_TOOL_DESCRIPTION,
-    parameters: z.object({
+    inputSchema: z.object({
       graphUri: z
         .string()
         .optional()

@@ -14,7 +14,7 @@ export function createExportRdfTool(
 ) {
   return tool({
     description: EXPORT_RDF_TOOL_DESCRIPTION,
-    parameters: z.object({
+    inputSchema: z.object({
       format: z.object({
         kind: z.literal("serialized").describe("Desired output format."),
         contentType: z.string().optional().describe(
@@ -22,7 +22,9 @@ export function createExportRdfTool(
         ),
       }),
     }),
-    execute: async (request: { format: { kind: "serialized"; contentType?: string } }) => {
+    execute: async (
+      request: { format: { kind: "serialized"; contentType?: string } },
+    ) => {
       try {
         const exportRequest: ExportRequest = {
           format: {

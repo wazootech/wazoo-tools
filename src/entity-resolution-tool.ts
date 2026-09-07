@@ -10,7 +10,7 @@ import { type EntityResolver, normalizeName } from "./entity-resolution.ts";
 export function createResolveEntityTool(resolver: EntityResolver) {
   return tool({
     description: ENTITY_RESOLUTION_TOOL_DESCRIPTION,
-    parameters: z.object({
+    inputSchema: z.object({
       operation: z.enum(["resolve", "lookup", "merge", "stats"]).describe(
         "Resolution operation to perform.",
       ),

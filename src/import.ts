@@ -14,7 +14,7 @@ export function createImportRdfTool(
 ) {
   return tool({
     description: IMPORT_RDF_TOOL_DESCRIPTION,
-    parameters: z.object({
+    inputSchema: z.object({
       mode: z.enum(["merge", "replace"]).optional().describe(
         "Mode of import (defaults to 'merge').",
       ),
@@ -28,7 +28,12 @@ export function createImportRdfTool(
         ),
       }),
     }),
-    execute: async (request: { mode?: "merge" | "replace"; source: { kind: "serialized"; data: string; contentType?: string } }) => {
+    execute: async (
+      request: {
+        mode?: "merge" | "replace";
+        source: { kind: "serialized"; data: string; contentType?: string };
+      },
+    ) => {
       try {
         const importRequest: ImportRequest = {
           mode: request.mode ?? "merge",
