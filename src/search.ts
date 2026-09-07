@@ -1,16 +1,17 @@
 import { tool } from "ai";
-import { z } from "zod";
+import type { SearchRequest, QuadFilter } from "@worlds/sdk/search-index";
 import { SEARCH_WORLD_TOOL_DESCRIPTION } from "./descriptions.ts";
+import { z } from "zod";
 
-export interface SearchClientInterface {
-  search(request: {
-    query: string;
-    include?: { subjects?: string[]; predicates?: string[]; graphs?: string[] };
-    exclude?: { subjects?: string[]; predicates?: string[]; graphs?: string[] };
-  }): Promise<unknown>;
-}
-
-export function createSearchWorldTool(client: SearchClientInterface) {
+/**
+ * createSearchWorldTool creates an AI SDK tool for searching a Worlds SDK client.
+ *
+ * @param client The Worlds SDK client instance.
+ * @returns An AI SDK tool for searching the graph.
+ */
+export function createSearchWorldTool(
+  client: { search(request: SearchRequest): Promise<unknown> },
+) {
   return tool({
     description: SEARCH_WORLD_TOOL_DESCRIPTION,
     parameters: z.object({
@@ -34,7 +35,7 @@ export function createSearchWorldTool(client: SearchClientInterface) {
         .optional()
         .describe("Negative constraints to filter out matching triples."),
     }),
-    execute: async (request) => {
+    execute: async (request: SearchRequest) => {
       try {
         const response = await client.search(request);
         return {
@@ -50,5 +51,3 @@ export function createSearchWorldTool(client: SearchClientInterface) {
     },
   });
 }
-
-export const createSearchEntitiesTool = createSearchWorldTool;
