@@ -13,6 +13,7 @@
     "ai": "npm:ai@^7.0.93",
     "zod": "npm:zod@^4.4.3",
     "@ai-sdk/provider": "npm:@ai-sdk/provider@^4.0.10",
+    "@ai-sdk/provider-utils": "npm:@ai-sdk/provider-utils@^5.0.36",
     "@worlds/sdk": "jsr:@worlds/sdk@^0.9.0",
     "@worlds/sdk/search-index": "jsr:@worlds/sdk@^0.9.0/search-index",
     "@worlds/sdk/quad-store": "jsr:@worlds/sdk@^0.9.0/quad-store",

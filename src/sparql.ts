@@ -1,5 +1,5 @@
-import { tool } from "ai";
 import type { SparqlRequest, SparqlResponse } from "@worlds/sdk/sparql-engine";
+import { type WorldsTool, worldsTool } from "./tool-result.ts";
 import { EXECUTE_SPARQL_TOOL_DESCRIPTION } from "./descriptions.ts";
 import { z } from "zod";
 
@@ -22,23 +22,33 @@ export interface ExecuteSparqlOptions {
  * @param options Configuration options for the tool.
  * @returns An AI SDK tool for executing SPARQL queries.
  */
+export interface ExecuteSparqlInput {
+  query: string;
+  baseIri?: string;
+  timeoutMs?: number;
+  signal?: AbortSignal;
+}
+
+const ExecuteSparqlInput: z.ZodType<ExecuteSparqlInput, ExecuteSparqlInput> = z
+  .object({
+    query: z.string().describe(
+      "The SPARQL query string to execute. Read-only queries (SELECT, ASK, CONSTRUCT, DESCRIBE) are allowed by default.",
+    ),
+    baseIri: z.string().optional().describe("Base IRI for query execution."),
+    timeoutMs: z.number().optional().describe(
+      "Query timeout in milliseconds.",
+    ),
+    signal: z.any().optional().describe("Abort signal for the query."),
+  });
+
 export function createExecuteSparqlTool(
   client: { sparql(request: SparqlRequest): Promise<SparqlResponse> },
   options?: ExecuteSparqlOptions,
-) {
-  return tool({
+): WorldsTool<ExecuteSparqlInput> {
+  return worldsTool({
     description: EXECUTE_SPARQL_TOOL_DESCRIPTION,
-    inputSchema: z.object({
-      query: z.string().describe(
-        "The SPARQL query string to execute. Read-only queries (SELECT, ASK, CONSTRUCT, DESCRIBE) are allowed by default.",
-      ),
-      baseIri: z.string().optional().describe("Base IRI for query execution."),
-      timeoutMs: z.number().optional().describe(
-        "Query timeout in milliseconds.",
-      ),
-      signal: z.any().optional().describe("Abort signal for the query."),
-    }),
-    execute: async (request: SparqlRequest) => {
+    inputSchema: ExecuteSparqlInput,
+    execute: async (request: ExecuteSparqlInput) => {
       const allowUpdates = options?.allowUpdates ?? false;
       if (!allowUpdates) {
         if (/\b(INSERT|DELETE|DROP|CLEAR|LOAD|CREATE)\b/i.test(request.query)) {

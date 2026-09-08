@@ -1,5 +1,6 @@
-import { rerank, tool } from "ai";
+import { rerank } from "ai";
 import type { RerankingModel } from "ai";
+import { type WorldsTool, worldsTool } from "./tool-result.ts";
 import type { SearchRequest, SearchResponse } from "@worlds/sdk/search-index";
 import { SEARCH_WORLD_TOOL_DESCRIPTION } from "./descriptions.ts";
 import { z } from "zod";
@@ -56,35 +57,45 @@ export interface SearchWorldOptions {
  * @param options Optional configuration; `options.rerank` enables two-stage retrieval.
  * @returns An AI SDK tool for searching the graph.
  */
+export interface SearchToolInput {
+  query: string;
+  include?: { subjects?: string[]; predicates?: string[]; graphs?: string[] };
+  exclude?: { subjects?: string[]; predicates?: string[]; graphs?: string[] };
+  topK?: number;
+  minScore?: number;
+}
+
+const SearchToolInput: z.ZodType<SearchToolInput, SearchToolInput> = z.object({
+  query: z.string().describe(
+    "Keyword, label, or natural-language query to search within the graph.",
+  ),
+  include: z
+    .object({
+      subjects: z.array(z.string()).optional(),
+      predicates: z.array(z.string()).optional(),
+      graphs: z.array(z.string()).optional(),
+    })
+    .optional()
+    .describe("Positive constraints for matching."),
+  exclude: z
+    .object({
+      subjects: z.array(z.string()).optional(),
+      predicates: z.array(z.string()).optional(),
+      graphs: z.array(z.string()).optional(),
+    })
+    .optional()
+    .describe("Negative constraints to filter out matching triples."),
+});
+
 export function createSearchWorldTool(
   client: { search(request: SearchRequest): Promise<SearchResponse> },
   options?: SearchWorldOptions,
-) {
+): WorldsTool<SearchToolInput> {
   const rerankOptions = options?.rerank;
-  return tool({
+  return worldsTool({
     description: SEARCH_WORLD_TOOL_DESCRIPTION,
-    inputSchema: z.object({
-      query: z.string().describe(
-        "Keyword, label, or natural-language query to search within the graph.",
-      ),
-      include: z
-        .object({
-          subjects: z.array(z.string()).optional(),
-          predicates: z.array(z.string()).optional(),
-          graphs: z.array(z.string()).optional(),
-        })
-        .optional()
-        .describe("Positive constraints for matching."),
-      exclude: z
-        .object({
-          subjects: z.array(z.string()).optional(),
-          predicates: z.array(z.string()).optional(),
-          graphs: z.array(z.string()).optional(),
-        })
-        .optional()
-        .describe("Negative constraints to filter out matching triples."),
-    }),
-    execute: async (request: SearchRequest) => {
+    inputSchema: SearchToolInput,
+    execute: async (request: SearchToolInput) => {
       try {
         // Recall stage: when reranking, fetch generously (recall ?? topK ?? 50)
         // so the reranker has room to reorder. include/exclude filters apply at

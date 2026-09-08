@@ -1,5 +1,5 @@
-import { tool } from "ai";
 import type { SparqlRequest } from "@worlds/sdk/sparql-engine";
+import { type WorldsTool, worldsTool } from "./tool-result.ts";
 import type { WorldsSdkInterface } from "@worlds/sdk";
 import { DISCOVER_SCHEMA_TOOL_DESCRIPTION } from "./descriptions.ts";
 import { z } from "zod";
@@ -21,20 +21,27 @@ export interface DiscoverSchemaOptions {
  * @param options Configuration options for the tool.
  * @returns An AI SDK tool for discovering the schema.
  */
+export interface DiscoverSchemaInput {
+  graphUri?: string;
+}
+
+const DiscoverSchemaInput: z.ZodType<DiscoverSchemaInput, DiscoverSchemaInput> =
+  z.object({
+    graphUri: z
+      .string()
+      .optional()
+      .describe("Optional target graph URI to introspect."),
+  });
+
 export function createDiscoverSchemaTool(
   client: WorldsSdkInterface,
   options?: DiscoverSchemaOptions,
-) {
+): WorldsTool<DiscoverSchemaInput> {
   const graphUris = options?.sources ?? [];
-  return tool({
+  return worldsTool({
     description: DISCOVER_SCHEMA_TOOL_DESCRIPTION,
-    inputSchema: z.object({
-      graphUri: z
-        .string()
-        .optional()
-        .describe("Optional target graph URI to introspect."),
-    }),
-    execute: async (request: { graphUri?: string }) => {
+    inputSchema: DiscoverSchemaInput,
+    execute: async (request: DiscoverSchemaInput) => {
       const graphUri = request.graphUri ?? graphUris[0];
       const graphClause = graphUri ? `GRAPH <${graphUri}> {` : "";
       const graphClose = graphUri ? "}" : "";

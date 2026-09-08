@@ -1,5 +1,5 @@
-import { tool } from "ai";
 import type { ImportRequest } from "@worlds/sdk/quad-store";
+import { type WorldsTool, worldsTool } from "./tool-result.ts";
 import { IMPORT_RDF_TOOL_DESCRIPTION } from "./descriptions.ts";
 import { z } from "zod";
 
@@ -9,31 +9,33 @@ import { z } from "zod";
  * @param client The Worlds SDK client instance.
  * @returns An AI SDK tool for importing RDF data.
  */
+export interface ImportRdfInput {
+  mode?: "merge" | "replace";
+  source: { kind: "serialized"; data: string; contentType?: string };
+}
+
+const ImportRdfInput: z.ZodType<ImportRdfInput, ImportRdfInput> = z.object({
+  mode: z.enum(["merge", "replace"]).optional().describe(
+    "Mode of import (defaults to 'merge').",
+  ),
+  source: z.object({
+    kind: z.literal("serialized").describe(
+      "The kind of data source. Always use 'serialized'.",
+    ),
+    data: z.string().describe("The serialized RDF data to import."),
+    contentType: z.string().optional().describe(
+      "The MIME type of the data. Usually 'text/turtle' or 'application/n-triples'.",
+    ),
+  }),
+});
+
 export function createImportRdfTool(
   client: { import(request: ImportRequest): Promise<void> },
-) {
-  return tool({
+): WorldsTool<ImportRdfInput> {
+  return worldsTool({
     description: IMPORT_RDF_TOOL_DESCRIPTION,
-    inputSchema: z.object({
-      mode: z.enum(["merge", "replace"]).optional().describe(
-        "Mode of import (defaults to 'merge').",
-      ),
-      source: z.object({
-        kind: z.literal("serialized").describe(
-          "The kind of data source. Always use 'serialized'.",
-        ),
-        data: z.string().describe("The serialized RDF data to import."),
-        contentType: z.string().optional().describe(
-          "The MIME type of the data. Usually 'text/turtle' or 'application/n-triples'.",
-        ),
-      }),
-    }),
-    execute: async (
-      request: {
-        mode?: "merge" | "replace";
-        source: { kind: "serialized"; data: string; contentType?: string };
-      },
-    ) => {
+    inputSchema: ImportRdfInput,
+    execute: async (request: ImportRdfInput) => {
       try {
         const importRequest: ImportRequest = {
           mode: request.mode ?? "merge",
