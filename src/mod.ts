@@ -1,12 +1,18 @@
 import type { WorldsSdkInterface } from "@worlds/sdk";
 import type { EntityResolver } from "./entity-resolution.ts";
+import type { WorldsTool } from "./tool-result.ts";
 import { createExecuteSparqlTool } from "./sparql.ts";
+import type { ExecuteSparqlInput } from "./sparql.ts";
 import { createSearchWorldTool } from "./search.ts";
-import type { SearchWorldOptions } from "./search.ts";
+import type { SearchToolInput, SearchWorldOptions } from "./search.ts";
 import { createDiscoverSchemaTool } from "./schema.ts";
+import type { DiscoverSchemaInput } from "./schema.ts";
 import { createImportRdfTool } from "./import.ts";
+import type { ImportRdfInput } from "./import.ts";
 import { createExportRdfTool } from "./export.ts";
+import type { ExportRdfInput } from "./export.ts";
 import { createResolveEntityTool } from "./entity-resolution-tool.ts";
+import type { ResolveEntityInput } from "./entity-resolution-tool.ts";
 
 export { createExecuteSparqlTool } from "./sparql.ts";
 export { createSearchWorldTool } from "./search.ts";
@@ -51,12 +57,26 @@ export interface CreateToolsConfig {
 }
 
 /**
+ * CreateToolsResult is the tool set createTools returns. resolveEntity is
+ * present only when config.entityResolver is supplied.
+ */
+export interface CreateToolsResult {
+  executeSparql: WorldsTool<ExecuteSparqlInput>;
+  searchWorld: WorldsTool<SearchToolInput>;
+  searchEntities: WorldsTool<SearchToolInput>;
+  discoverSchema: WorldsTool<DiscoverSchemaInput>;
+  importRdf: WorldsTool<ImportRdfInput>;
+  exportRdf: WorldsTool<ExportRdfInput>;
+  resolveEntity?: WorldsTool<ResolveEntityInput>;
+}
+
+/**
  * createTools creates AI SDK compatible tools that interact with a Worlds SDK client.
  *
  * @param config The configuration for the tools.
  * @returns An object containing the AI SDK tools.
  */
-export function createTools(config: CreateToolsConfig) {
+export function createTools(config: CreateToolsConfig): CreateToolsResult {
   const client = config.client;
   if (!client) {
     throw new Error(

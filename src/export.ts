@@ -1,5 +1,5 @@
-import { tool } from "ai";
 import type { ExportRequest, ExportResponse } from "@worlds/sdk/quad-store";
+import { type WorldsTool, worldsTool } from "./tool-result.ts";
 import { EXPORT_RDF_TOOL_DESCRIPTION } from "./descriptions.ts";
 import { z } from "zod";
 
@@ -9,22 +9,26 @@ import { z } from "zod";
  * @param client The Worlds SDK client instance.
  * @returns An AI SDK tool for exporting RDF data.
  */
+export interface ExportRdfInput {
+  format: { kind: "serialized"; contentType?: string };
+}
+
+const ExportRdfInput: z.ZodType<ExportRdfInput, ExportRdfInput> = z.object({
+  format: z.object({
+    kind: z.literal("serialized").describe("Desired output format."),
+    contentType: z.string().optional().describe(
+      "The MIME type of the exported data. Usually 'text/turtle' or 'application/n-triples'.",
+    ),
+  }),
+});
+
 export function createExportRdfTool(
   client: { export(request: ExportRequest): Promise<ExportResponse> },
-) {
-  return tool({
+): WorldsTool<ExportRdfInput> {
+  return worldsTool({
     description: EXPORT_RDF_TOOL_DESCRIPTION,
-    inputSchema: z.object({
-      format: z.object({
-        kind: z.literal("serialized").describe("Desired output format."),
-        contentType: z.string().optional().describe(
-          "The MIME type of the exported data. Usually 'text/turtle' or 'application/n-triples'.",
-        ),
-      }),
-    }),
-    execute: async (
-      request: { format: { kind: "serialized"; contentType?: string } },
-    ) => {
+    inputSchema: ExportRdfInput,
+    execute: async (request: ExportRdfInput) => {
       try {
         const exportRequest: ExportRequest = {
           format: {
