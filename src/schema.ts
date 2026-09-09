@@ -57,7 +57,9 @@ export function createDiscoverSchemaTool(
         const response = await client.sparql({ query } as SparqlRequest);
         return {
           success: true,
-          data: response,
+          data: response.kind === "void"
+            ? null
+            : (response as { data?: unknown }).data,
         };
       } catch (error) {
         return {

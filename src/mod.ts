@@ -15,7 +15,7 @@ import { createResolveEntityTool } from "./entity-resolution-tool.ts";
 import type { ResolveEntityInput } from "./entity-resolution-tool.ts";
 
 export { createExecuteSparqlTool } from "./sparql.ts";
-export { createSearchWorldTool } from "./search.ts";
+export { createSearchEntitiesTool, createSearchWorldTool } from "./search.ts";
 export type { SearchWorldOptions, SearchWorldRerankOptions } from "./search.ts";
 export {
   createDiscoverSchemaTool,
@@ -24,6 +24,20 @@ export {
 export { createImportRdfTool } from "./import.ts";
 export { createExportRdfTool } from "./export.ts";
 export { createResolveEntityTool } from "./entity-resolution-tool.ts";
+export {
+  cosineSimilarity,
+  EntityResolver,
+  InMemoryEntityStore,
+  normalizeName,
+} from "./entity-resolution.ts";
+export type {
+  EmbeddingFn,
+  EntityInput,
+  EntityResolverOptions,
+  EntityStore,
+  ResolvedEntity,
+} from "./entity-resolution.ts";
+export * from "./descriptions.ts";
 
 /**
  * CreateToolsConfig defines the configuration options for the AI SDK tools.

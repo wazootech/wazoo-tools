@@ -1,8 +1,12 @@
+import { assertEquals, assertThrows } from "@std/assert";
 import {
-  assertEquals,
-  assertThrows,
-} from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { createExecuteSparqlTool, createTools } from "../src/mod.ts";
+  createDiscoverSchemaTool,
+  createExecuteSparqlTool,
+  createSearchEntitiesTool,
+  createTools,
+  EntityResolver,
+  InMemoryEntityStore,
+} from "../src/mod.ts";
 import type { WorldsSdkInterface } from "@worlds/sdk";
 import type { SparqlResponse } from "@worlds/sdk/sparql-engine";
 import type {
@@ -336,4 +340,40 @@ Deno.test("createTools initializes all AI SDK tools with client", () => {
   assertEquals(typeof tools.discoverSchema, "object");
   assertEquals(typeof tools.importRdf, "object");
   assertEquals(typeof tools.exportRdf, "object");
+});
+
+Deno.test("discoverSchema unwraps the select response envelope", async () => {
+  const mockClient = asClient<WorldsSdkInterface>({
+    sparql: () =>
+      Promise.resolve({
+        kind: "select",
+        data: {
+          head: { vars: ["type", "predicate"] },
+          results: {
+            bindings: [
+              { type: { type: "uri", value: "http://schema.org/Person" } },
+            ],
+          },
+        },
+      } as SparqlResponse),
+  });
+
+  const schemaTool = createDiscoverSchemaTool(mockClient, { sources: ["g"] });
+  const res = (await schemaTool.execute!(
+    {},
+    { toolCallId: "d1", messages: [], context: {} },
+  )) as { success: boolean; data?: unknown };
+  assertEquals(res.success, true);
+  assertEquals(res.data, {
+    head: { vars: ["type", "predicate"] },
+    results: {
+      bindings: [{ type: { type: "uri", value: "http://schema.org/Person" } }],
+    },
+  });
+});
+
+Deno.test("barrel re-exports the entity-resolution and searchEntities surface", () => {
+  assertEquals(typeof createSearchEntitiesTool, "function");
+  assertEquals(typeof EntityResolver, "function");
+  assertEquals(typeof InMemoryEntityStore, "function");
 });
