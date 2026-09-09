@@ -1,43 +1,46 @@
-import { tool } from "ai";
-import { z } from "zod";
+import type { ExportRequest, ExportResponse } from "@worlds/sdk/quad-store";
+import { type WorldsTool, worldsTool } from "./tool-result.ts";
 import { EXPORT_RDF_TOOL_DESCRIPTION } from "./descriptions.ts";
+import { z } from "zod";
 
-export interface ExportRdfClientInterface {
-  exportRdf?(request: {
-    format?: string;
-    graphUri?: string;
-  }): Promise<unknown>;
-  sparql?(request: { query: string }): Promise<{ data?: unknown }>;
+/**
+ * createExportRdfTool creates an AI SDK tool for exporting RDF data from a Worlds SDK client.
+ *
+ * @param client The Worlds SDK client instance.
+ * @returns An AI SDK tool for exporting RDF data.
+ */
+export interface ExportRdfInput {
+  format: { kind: "serialized"; contentType?: string };
 }
 
-export function createExportRdfTool(client: ExportRdfClientInterface) {
-  return tool({
+const ExportRdfInput: z.ZodType<ExportRdfInput, ExportRdfInput> = z.object({
+  format: z.object({
+    kind: z.literal("serialized").describe("Desired output format."),
+    contentType: z.string().optional().describe(
+      "The MIME type of the exported data. Usually 'text/turtle' or 'application/n-triples'.",
+    ),
+  }),
+});
+
+export function createExportRdfTool(
+  client: { export(request: ExportRequest): Promise<ExportResponse> },
+): WorldsTool<ExportRdfInput> {
+  return worldsTool({
     description: EXPORT_RDF_TOOL_DESCRIPTION,
-    parameters: z.object({
-      format: z
-        .enum(["turtle", "ntriples", "nquads", "json-ld"])
-        .default("turtle")
-        .describe("Requested export format."),
-      graphUri: z.string().optional().describe(
-        "Target named graph URI to export.",
-      ),
-    }),
-    execute: async (request) => {
+    inputSchema: ExportRdfInput,
+    execute: async (request: ExportRdfInput) => {
       try {
-        if (typeof client.exportRdf === "function") {
-          const res = await client.exportRdf(request);
-          return { success: true, data: res };
-        }
-        if (typeof client.sparql === "function") {
-          const graphClause = request.graphUri
-            ? `FROM <${request.graphUri}>`
-            : "";
-          const query =
-            `CONSTRUCT { ?s ?p ?o } ${graphClause} WHERE { ?s ?p ?o }`;
-          const res = await client.sparql({ query });
-          return { success: true, data: res.data };
-        }
-        throw new Error("Client does not support RDF export.");
+        const exportRequest: ExportRequest = {
+          format: {
+            kind: "serialized",
+            contentType: request.format.contentType,
+          },
+        };
+        const response = await client.export(exportRequest);
+        return {
+          success: true,
+          data: response.kind === "serialized" ? response.data : null,
+        };
       } catch (error) {
         return {
           success: false,
