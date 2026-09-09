@@ -26,7 +26,6 @@ export interface ExecuteSparqlInput {
   query: string;
   baseIri?: string;
   timeoutMs?: number;
-  signal?: AbortSignal;
 }
 
 const ExecuteSparqlInput: z.ZodType<ExecuteSparqlInput, ExecuteSparqlInput> = z
