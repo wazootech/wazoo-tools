@@ -19,7 +19,7 @@ import type {
   RerankingModelV3,
   RerankingModelV3CallOptions,
 } from "@ai-sdk/provider";
-import { createSearchWorldTool } from "../src/search.ts";
+import { createSearchWorldTool, SearchToolInput } from "../src/search.ts";
 
 /**
  * The tests exercise the tool factories against minimal mock clients. They
@@ -377,3 +377,37 @@ Deno.test("barrel re-exports the entity-resolution and searchEntities surface", 
   assertEquals(typeof EntityResolver, "function");
   assertEquals(typeof InMemoryEntityStore, "function");
 });
+
+Deno.test(
+  "searchWorld input schema passes topK/minScore through to recall",
+  () => {
+    const parsed = SearchToolInput.parse({
+      query: "q",
+      topK: 10,
+      minScore: 0.5,
+      include: { predicates: ["schema:name"] },
+    });
+    assertEquals(parsed.topK, 10);
+    assertEquals(parsed.minScore, 0.5);
+    assertEquals(parsed.include, { predicates: ["schema:name"] });
+  },
+);
+
+Deno.test(
+  "searchWorld falls back to the request topK when rerank.recall is unset",
+  async () => {
+    const { client, requests } = mockSearchClient([
+      searchResult("a", "a-doc", 0.9),
+      searchResult("b", "b-doc", 0.5),
+    ]);
+    const { model } = mockRerankModel([0, 1], [1, 0.4]);
+    const searchTool = createSearchWorldTool(client, {
+      rerank: { model },
+    });
+    await searchTool.execute!(
+      { query: "q", topK: 10 },
+      { toolCallId: "r6", messages: [], context: {} },
+    );
+    assertEquals(requests, [{ query: "q", topK: 10 }]);
+  },
+);

@@ -65,27 +65,34 @@ export interface SearchToolInput {
   minScore?: number;
 }
 
-const SearchToolInput: z.ZodType<SearchToolInput, SearchToolInput> = z.object({
-  query: z.string().describe(
-    "Keyword, label, or natural-language query to search within the graph.",
-  ),
-  include: z
-    .object({
-      subjects: z.array(z.string()).optional(),
-      predicates: z.array(z.string()).optional(),
-      graphs: z.array(z.string()).optional(),
-    })
-    .optional()
-    .describe("Positive constraints for matching."),
-  exclude: z
-    .object({
-      subjects: z.array(z.string()).optional(),
-      predicates: z.array(z.string()).optional(),
-      graphs: z.array(z.string()).optional(),
-    })
-    .optional()
-    .describe("Negative constraints to filter out matching triples."),
-});
+export const SearchToolInput: z.ZodType<SearchToolInput, SearchToolInput> = z
+  .object({
+    query: z.string().describe(
+      "Keyword, label, or natural-language query to search within the graph.",
+    ),
+    include: z
+      .object({
+        subjects: z.array(z.string()).optional(),
+        predicates: z.array(z.string()).optional(),
+        graphs: z.array(z.string()).optional(),
+      })
+      .optional()
+      .describe("Positive constraints for matching."),
+    exclude: z
+      .object({
+        subjects: z.array(z.string()).optional(),
+        predicates: z.array(z.string()).optional(),
+        graphs: z.array(z.string()).optional(),
+      })
+      .optional()
+      .describe("Negative constraints to filter out matching triples."),
+    topK: z.number().optional().describe(
+      "Maximum number of candidates to recall before reranking or return.",
+    ),
+    minScore: z.number().optional().describe(
+      "Minimum relevance score a result must meet to be included.",
+    ),
+  });
 
 export function createSearchWorldTool(
   client: { search(request: SearchRequest): Promise<SearchResponse> },
