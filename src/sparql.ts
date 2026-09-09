@@ -38,7 +38,6 @@ const ExecuteSparqlInput: z.ZodType<ExecuteSparqlInput, ExecuteSparqlInput> = z
     timeoutMs: z.number().optional().describe(
       "Query timeout in milliseconds.",
     ),
-    signal: z.any().optional().describe("Abort signal for the query."),
   });
 
 export function createExecuteSparqlTool(

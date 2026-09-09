@@ -1,14 +1,11 @@
-import {
-  assertAlmostEquals,
-  assertEquals,
-} from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { assertAlmostEquals, assertEquals } from "@std/assert";
 import { createResolveEntityTool } from "../src/entity-resolution-tool.ts";
 import {
   cosineSimilarity,
   EntityResolver,
   InMemoryEntityStore,
   normalizeName,
-} from "../src/entity-resolution.ts";
+} from "../src/mod.ts";
 import { createTools } from "../src/mod.ts";
 
 Deno.test("normalizeName lowercases and collapses whitespace", () => {
