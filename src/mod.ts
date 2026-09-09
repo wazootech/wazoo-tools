@@ -4,7 +4,7 @@ import type { WorldsTool } from "./tool-result.ts";
 import { createExecuteSparqlTool } from "./sparql.ts";
 import type { ExecuteSparqlInput } from "./sparql.ts";
 import { createSearchWorldTool } from "./search.ts";
-import type { SearchToolInput, SearchWorldOptions } from "./search.ts";
+import type { SearchToolInput } from "./search.ts";
 import { createDiscoverSchemaTool } from "./schema.ts";
 import type { DiscoverSchemaInput } from "./schema.ts";
 import { createImportRdfTool } from "./import.ts";
@@ -16,7 +16,6 @@ import type { ResolveEntityInput } from "./entity-resolution-tool.ts";
 
 export { createExecuteSparqlTool } from "./sparql.ts";
 export { createSearchEntitiesTool, createSearchWorldTool } from "./search.ts";
-export type { SearchWorldOptions, SearchWorldRerankOptions } from "./search.ts";
 export {
   createDiscoverSchemaTool,
   type DiscoverSchemaOptions,
@@ -59,12 +58,6 @@ export interface CreateToolsConfig {
   sources?: string[];
 
   /**
-   * searchOptions defines configuration overrides for the searchWorld/searchEntities tools,
-   * including optional two-stage retrieval (rerank) settings.
-   */
-  searchOptions?: SearchWorldOptions;
-
-  /**
    * entityResolver defines the entity resolution layer to use for the resolveEntity tool.
    */
   entityResolver?: EntityResolver;
@@ -100,8 +93,8 @@ export function createTools(config: CreateToolsConfig): CreateToolsResult {
 
   return {
     executeSparql: createExecuteSparqlTool(client, config.sparqlOptions),
-    searchWorld: createSearchWorldTool(client, config.searchOptions),
-    searchEntities: createSearchWorldTool(client, config.searchOptions),
+    searchWorld: createSearchWorldTool(client),
+    searchEntities: createSearchWorldTool(client),
     discoverSchema: createDiscoverSchemaTool(client, {
       sources: config.sources,
     }),
