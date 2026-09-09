@@ -1,0 +1,32 @@
+name: Publish to JSR
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  publish:
+    if: github.repository == 'wazootech/wazoo-tools'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check if version is already published
+        id: version
+        run: |
+          VERSION=$(jq -r .version deno.json)
+          if curl -sf https://jsr.io/@wazoo/tools/meta.json | jq -e ".versions[\"$VERSION\"]" > /dev/null; then
+            echo "already-published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "already-published=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Publish to JSR (dry run)
+        run: deno publish --dry-run
+      - name: Publish to JSR
+        if: steps.version.outputs.already-published == 'false'
+        run: deno publish --quiet
