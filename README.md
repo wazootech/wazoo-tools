@@ -29,7 +29,7 @@ const worlds = new WorldsSdk({
 });
 
 const tools = createTools({
-  worlds,
+  client: worlds,
   sources: ["my-world"],
 });
 
@@ -46,8 +46,15 @@ const { text } = await generateText({
 - `executeSparql`: Execute SPARQL queries against the graph (read-only by
   default).
 - `searchWorld` / `searchEntities`: Vector and semantic search against knowledge
-  graphs.
+  graphs. Optional two-stage retrieval: pass `searchOptions.rerank` with a
+  caller-supplied AI SDK `RerankingModel` (e.g.
+  `cohere.reranking("rerank-v3.5")`) to recall generously, reorder with the
+  cross-encoder, and cut to `topN`. A reranker failure degrades ordering, not
+  the tool call.
 - `discoverSchema`: Explore ontology classes and predicate relations.
+- `resolveEntity`: Cross-session entity resolution — map candidate names (with
+  optional embeddings) to stable canonical IDs, absorbing aliases
+  (`EntityResolver` is exported standalone for non-agent use).
 - `importRdf`: Import RDF triples into a world graph.
 - `exportRdf`: Export RDF triples from a world graph.
 

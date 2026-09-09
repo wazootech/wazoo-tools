@@ -9,3 +9,5 @@ yarn-error.log*
 dist/
 coverage/
 .deno/
+# dependencies
+node_modules/
