@@ -68,5 +68,3 @@ export function createSearchWorldTool(
     },
   });
 }
-
-export const createSearchEntitiesTool = createSearchWorldTool;

@@ -1,11 +1,10 @@
 {
   "name": "@wazoo/tools",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "exports": {
     ".": "./src/mod.ts",
     "./sparql": "./src/sparql.ts",
     "./search": "./src/search.ts",
-    "./schema": "./src/schema.ts",
     "./import": "./src/import.ts",
     "./export": "./src/export.ts"
   },

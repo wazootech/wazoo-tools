@@ -576,11 +576,6 @@
       "npm:@rdfjs/types@^2.0.1",
       "npm:ai@^7.0.93",
       "npm:zod@^4.5.4"
-    ],
-    "packageJson": {
-      "dependencies": [
-        "npm:zod@^4.5.4"
-      ]
-    }
+    ]
   }
 }

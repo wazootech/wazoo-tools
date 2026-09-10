@@ -1,8 +1,9 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import {
-  createDiscoverSchemaTool,
+  createAdministrativeTools,
   createExecuteSparqlTool,
-  createSearchEntitiesTool,
+  createIngestTools,
+  createRecallTools,
   createTools,
   EntityResolver,
   InMemoryEntityStore,
@@ -161,46 +162,15 @@ Deno.test("createTools initializes all AI SDK tools with client", () => {
       Promise.resolve({ processedQuadCount: 0, chunkRowCount: 0 } as never),
   });
 
-  const tools = createTools({ client: mockClient, sources: ["test-world"] });
+  const tools = createTools({ client: mockClient });
   assertEquals(typeof tools.executeSparql, "object");
   assertEquals(typeof tools.searchWorld, "object");
-  assertEquals(typeof tools.discoverSchema, "object");
   assertEquals(typeof tools.importRdf, "object");
   assertEquals(typeof tools.exportRdf, "object");
+  assertEquals(typeof tools.reindexWorld, "object");
 });
 
-Deno.test("discoverSchema unwraps the select response envelope", async () => {
-  const mockClient = asClient<WorldsSdkInterface>({
-    sparql: () =>
-      Promise.resolve({
-        kind: "select",
-        data: {
-          head: { vars: ["type", "predicate"] },
-          results: {
-            bindings: [
-              { type: { type: "uri", value: "http://schema.org/Person" } },
-            ],
-          },
-        },
-      } as SparqlResponse),
-  });
-
-  const schemaTool = createDiscoverSchemaTool(mockClient, { sources: ["g"] });
-  const res = (await schemaTool.execute!(
-    {},
-    { toolCallId: "d1", messages: [], context: {} },
-  )) as { success: boolean; data?: unknown };
-  assertEquals(res.success, true);
-  assertEquals(res.data, {
-    head: { vars: ["type", "predicate"] },
-    results: {
-      bindings: [{ type: { type: "uri", value: "http://schema.org/Person" } }],
-    },
-  });
-});
-
-Deno.test("barrel re-exports the entity-resolution and searchEntities surface", () => {
-  assertEquals(typeof createSearchEntitiesTool, "function");
+Deno.test("barrel re-exports the entity-resolution surface", () => {
   assertEquals(typeof EntityResolver, "function");
   assertEquals(typeof InMemoryEntityStore, "function");
 });
@@ -228,4 +198,33 @@ Deno.test("searchWorld passes topK/minScore through to the SDK request", async (
     { toolCallId: "r6", messages: [], context: {} },
   );
   assertEquals(requests, [{ query: "q", topK: 10, minScore: 0.5 }]);
+});
+
+Deno.test("phase profiles expose only the capabilities for that phase", () => {
+  const client = asClient<WorldsSdkInterface>({
+    sparql: () => Promise.resolve({ kind: "void" } as SparqlResponse),
+    search: () => Promise.resolve({ results: [] } as never),
+    import: () => Promise.resolve(),
+    export: () =>
+      Promise.resolve(
+        { kind: "serialized", data: "", contentType: "text/turtle" } as never,
+      ),
+    reindex: () =>
+      Promise.resolve({ processedQuadCount: 0, chunkRowCount: 0 } as never),
+  });
+  assertEquals(Object.keys(createRecallTools({ client })).sort(), [
+    "executeSparql",
+    "searchWorld",
+  ]);
+  assertEquals(Object.keys(createIngestTools({ client })).sort(), [
+    "executeSparql",
+    "exportRdf",
+    "importRdf",
+  ]);
+  assertEquals(Object.keys(createAdministrativeTools({ client })).sort(), [
+    "executeSparql",
+    "exportRdf",
+    "importRdf",
+    "reindexWorld",
+  ]);
 });

@@ -30,7 +30,6 @@ const worlds = new WorldsSdk({
 
 const tools = createTools({
   client: worlds,
-  sources: ["my-world"],
 });
 
 const { text } = await generateText({
@@ -43,16 +42,21 @@ const { text } = await generateText({
 
 ## Included Tools
 
-- `executeSparql`: Execute SPARQL queries against the graph (read-only by
-  default).
-- `searchWorld` / `searchEntities`: Vector and semantic search against knowledge
-  graphs.
-- `discoverSchema`: Explore ontology classes and predicate relations.
-- `resolveEntity`: Cross-session entity resolution — map candidate names (with
-  optional embeddings) to stable canonical IDs, absorbing aliases
-  (`EntityResolver` is exported standalone for non-agent use).
-- `importRdf`: Import RDF triples into a world graph.
-- `exportRdf`: Export RDF triples from a world graph.
+- `createTools`: full lifecycle surface for a self-managing agent.
+- `createRecallTools`: read-only `searchWorld` and `executeSparql`.
+- `createIngestTools`: RDF import/export, read-only verification SPARQL, and
+  optional `resolveEntity`.
+- `createAdministrativeTools`: RDF import/export, `reindexWorld`, writable
+  SPARQL when explicitly enabled, and optional `resolveEntity`.
+
+The full surface is intentionally available as a one-size-fits-all starting
+point. Phase-specific factories prevent recall agents from seeing mutation and
+identity-management capabilities they should not invoke.
+
+The identity layer persists canonical entities, aliases, and co-reference links
+through `WorldsEntityStore` when backed by a Worlds SDK client. Canonical IDs
+are generated once by code and never derived from mutable names or ontology
+fields.
 
 ## License
 
