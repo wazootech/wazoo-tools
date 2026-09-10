@@ -30,7 +30,6 @@ const worlds = new WorldsSdk({
 
 const tools = createTools({
   client: worlds,
-  sources: ["my-world"],
 });
 
 const { text } = await generateText({
@@ -45,9 +44,7 @@ const { text } = await generateText({
 
 - `executeSparql`: Execute SPARQL queries against the graph (read-only by
   default).
-- `searchWorld` / `searchEntities`: Vector and semantic search against knowledge
-  graphs.
-- `discoverSchema`: Explore ontology classes and predicate relations.
+- `searchWorld`: Vector and semantic search against knowledge graphs.
 - `resolveEntity`: Cross-session entity resolution — map candidate names (with
   optional embeddings) to stable canonical IDs, absorbing aliases
   (`EntityResolver` is exported standalone for non-agent use).

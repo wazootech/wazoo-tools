@@ -5,8 +5,6 @@ import { createExecuteSparqlTool } from "./sparql.ts";
 import type { ExecuteSparqlInput } from "./sparql.ts";
 import { createSearchWorldTool } from "./search.ts";
 import type { SearchToolInput } from "./search.ts";
-import { createDiscoverSchemaTool } from "./schema.ts";
-import type { DiscoverSchemaInput } from "./schema.ts";
 import { createImportRdfTool } from "./import.ts";
 import type { ImportRdfInput } from "./import.ts";
 import { createExportRdfTool } from "./export.ts";
@@ -15,11 +13,7 @@ import { createResolveEntityTool } from "./entity-resolution-tool.ts";
 import type { ResolveEntityInput } from "./entity-resolution-tool.ts";
 
 export { createExecuteSparqlTool } from "./sparql.ts";
-export { createSearchEntitiesTool, createSearchWorldTool } from "./search.ts";
-export {
-  createDiscoverSchemaTool,
-  type DiscoverSchemaOptions,
-} from "./schema.ts";
+export { createSearchWorldTool } from "./search.ts";
 export { createImportRdfTool } from "./import.ts";
 export { createExportRdfTool } from "./export.ts";
 export { createResolveEntityTool } from "./entity-resolution-tool.ts";
@@ -53,11 +47,6 @@ export interface CreateToolsConfig {
   sparqlOptions?: { allowUpdates?: boolean };
 
   /**
-   * sources defines the list of graph URIs to introspect for the discoverSchema tool.
-   */
-  sources?: string[];
-
-  /**
    * entityResolver defines the entity resolution layer to use for the resolveEntity tool.
    */
   entityResolver?: EntityResolver;
@@ -70,8 +59,6 @@ export interface CreateToolsConfig {
 export interface CreateToolsResult {
   executeSparql: WorldsTool<ExecuteSparqlInput>;
   searchWorld: WorldsTool<SearchToolInput>;
-  searchEntities: WorldsTool<SearchToolInput>;
-  discoverSchema: WorldsTool<DiscoverSchemaInput>;
   importRdf: WorldsTool<ImportRdfInput>;
   exportRdf: WorldsTool<ExportRdfInput>;
   resolveEntity?: WorldsTool<ResolveEntityInput>;
@@ -94,10 +81,6 @@ export function createTools(config: CreateToolsConfig): CreateToolsResult {
   return {
     executeSparql: createExecuteSparqlTool(client, config.sparqlOptions),
     searchWorld: createSearchWorldTool(client),
-    searchEntities: createSearchWorldTool(client),
-    discoverSchema: createDiscoverSchemaTool(client, {
-      sources: config.sources,
-    }),
     importRdf: createImportRdfTool(client),
     exportRdf: createExportRdfTool(client),
     ...(config.entityResolver

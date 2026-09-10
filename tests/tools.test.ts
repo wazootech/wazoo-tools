@@ -1,8 +1,6 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import {
-  createDiscoverSchemaTool,
   createExecuteSparqlTool,
-  createSearchEntitiesTool,
   createTools,
   EntityResolver,
   InMemoryEntityStore,
@@ -161,46 +159,14 @@ Deno.test("createTools initializes all AI SDK tools with client", () => {
       Promise.resolve({ processedQuadCount: 0, chunkRowCount: 0 } as never),
   });
 
-  const tools = createTools({ client: mockClient, sources: ["test-world"] });
+  const tools = createTools({ client: mockClient });
   assertEquals(typeof tools.executeSparql, "object");
   assertEquals(typeof tools.searchWorld, "object");
-  assertEquals(typeof tools.discoverSchema, "object");
   assertEquals(typeof tools.importRdf, "object");
   assertEquals(typeof tools.exportRdf, "object");
 });
 
-Deno.test("discoverSchema unwraps the select response envelope", async () => {
-  const mockClient = asClient<WorldsSdkInterface>({
-    sparql: () =>
-      Promise.resolve({
-        kind: "select",
-        data: {
-          head: { vars: ["type", "predicate"] },
-          results: {
-            bindings: [
-              { type: { type: "uri", value: "http://schema.org/Person" } },
-            ],
-          },
-        },
-      } as SparqlResponse),
-  });
-
-  const schemaTool = createDiscoverSchemaTool(mockClient, { sources: ["g"] });
-  const res = (await schemaTool.execute!(
-    {},
-    { toolCallId: "d1", messages: [], context: {} },
-  )) as { success: boolean; data?: unknown };
-  assertEquals(res.success, true);
-  assertEquals(res.data, {
-    head: { vars: ["type", "predicate"] },
-    results: {
-      bindings: [{ type: { type: "uri", value: "http://schema.org/Person" } }],
-    },
-  });
-});
-
-Deno.test("barrel re-exports the entity-resolution and searchEntities surface", () => {
-  assertEquals(typeof createSearchEntitiesTool, "function");
+Deno.test("barrel re-exports the entity-resolution surface", () => {
   assertEquals(typeof EntityResolver, "function");
   assertEquals(typeof InMemoryEntityStore, "function");
 });
