@@ -15,3 +15,6 @@ export const IMPORT_RDF_TOOL_DESCRIPTION =
 
 export const EXPORT_RDF_TOOL_DESCRIPTION =
   "Export RDF graph triples from the knowledge base in requested serialization format.";
+
+export const REINDEX_WORLD_TOOL_DESCRIPTION =
+  "Rebuild derived search structures from the durable graph. Use for repair, audit, or bulk-import completion; ordinary imports use incremental projection.";

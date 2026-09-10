@@ -31,6 +31,8 @@
 /** Embedding function contract satisfied by Worlds/OpenAI embedding services. */
 export type EmbeddingFn = (input: string) => Promise<number[]>;
 
+export type CanonicalIdGenerator = () => string;
+
 /** Optional deterministic guards evaluated before any similarity scoring. */
 export interface EntityResolverOptions {
   /** Cosine threshold above which two candidates are the same entity (0–1). */
@@ -46,6 +48,8 @@ export interface EntityResolverOptions {
   exactMatchIri?: string;
   /** Co-ref predicate for near matches (default skos:closeMatch). */
   closeMatchIri?: string;
+  /** Generates a fresh canonical identifier. IDs are never derived from mutable entity attributes. */
+  canonicalIdGenerator?: CanonicalIdGenerator;
 }
 
 export interface EntityInput {
@@ -64,7 +68,7 @@ export interface EntityInput {
 }
 
 export interface ResolvedEntity {
-  /** Stable canonical ID — content hash, independent of any session. */
+  /** Stable canonical ID generated once and persisted with the entity. */
   id: string;
   /** Best-known display name for the canonical entity. */
   name: string;
@@ -78,8 +82,8 @@ export interface ResolvedEntity {
   matchPredicate?: string;
 }
 
-/** Internal canonical entity record. */
-interface StoredEntity {
+/** Durable canonical entity record used by graph-backed stores. */
+export interface StoredEntity {
   id: string;
   name: string;
   classIri?: string;
@@ -96,6 +100,12 @@ export interface EntityStore {
   put(entity: StoredEntity): Promise<void>;
   /** All stored entities (implementations may page; correctness > scale here). */
   list(): Promise<StoredEntity[]>;
+  /** Persist a typed co-reference edge when the store supports graph links. */
+  recordLink?(
+    canonicalId: string,
+    scopedUrn: string,
+    predicateIri: string,
+  ): Promise<void>;
 }
 
 /** In-memory EntityStore — default for tests and single-process usage. */
@@ -114,25 +124,6 @@ export class InMemoryEntityStore implements EntityStore {
   list(): Promise<StoredEntity[]> {
     return Promise.resolve([...this.#entities.values()]);
   }
-}
-
-/**
- * SHA-256 of the class-qualified normalized name, hex — the canonical ID
- * scheme. The class participates in the hash because the deterministic
- * guards deliberately keep same-name-different-class entities separate
- * ("Harborview" the person vs "Harborview" the organization).
- */
-async function contentHashId(
-  classIri: string | undefined,
-  normalizedName: string,
-): Promise<string> {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(`${classIri ?? ""}|${normalizedName}`),
-  );
-  return [...new Uint8Array(digest)]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
 }
 
 export function normalizeName(name: string): string {
@@ -170,6 +161,8 @@ export class EntityResolver {
         "http://www.w3.org/2004/02/skos/core#exactMatch",
       closeMatchIri: options?.closeMatchIri ??
         "http://www.w3.org/2004/02/skos/core#closeMatch",
+      canonicalIdGenerator: options?.canonicalIdGenerator ??
+        (() => `urn:entity:${crypto.randomUUID()}`),
     };
   }
 
@@ -226,6 +219,9 @@ export class EntityResolver {
         ? this.#options.exactMatchIri
         : this.#options.closeMatchIri;
       await this.#store.put(entity);
+      if (input.scopedUrn && this.#store.recordLink) {
+        await this.#store.recordLink(entity.id, input.scopedUrn, predicate);
+      }
       return {
         id: entity.id,
         name: entity.name,
@@ -238,9 +234,9 @@ export class EntityResolver {
 
     // No stored entity cleared the guards, so this candidate is a NEW
     // canonical entity even if a same-named one exists (different class,
-    // or same name with a divergent embedding). Disambiguate the ID when
-    // the class-qualified hash is already taken.
-    const baseId = await contentHashId(input.classIri, normalized);
+    // or same name with a divergent embedding). Generate a fresh ID rather
+    // than deriving one from mutable names or ontology attributes.
+    const baseId = this.#options.canonicalIdGenerator();
     let id = baseId;
     for (let n = 2; await this.#store.get(id); n++) {
       id = `${baseId}:${n}`;
@@ -256,6 +252,13 @@ export class EntityResolver {
     };
     if (input.scopedUrn) entity.aliases.set(normalized, input.scopedUrn);
     await this.#store.put(entity);
+    if (input.scopedUrn && this.#store.recordLink) {
+      await this.#store.recordLink(
+        entity.id,
+        input.scopedUrn,
+        this.#options.exactMatchIri,
+      );
+    }
     return { id, name: entity.name, classIri: entity.classIri, matched: false };
   }
 
@@ -273,9 +276,13 @@ export class EntityResolver {
     if (!entity) throw new Error(`Unknown canonical entity: ${canonicalId}`);
     entity.aliases.set(normalizeName(entity.name), scopedUrn);
     await this.#store.put(entity);
-    return confidence >= 0.99
+    const predicate = confidence >= 0.99
       ? this.#options.exactMatchIri
       : this.#options.closeMatchIri;
+    if (this.#store.recordLink) {
+      await this.#store.recordLink(canonicalId, scopedUrn, predicate);
+    }
+    return predicate;
   }
 
   /** Lookup a canonical entity by ID, including its alias table. */

@@ -20,8 +20,10 @@ Deno.test("cosineSimilarity is 1 for identical vectors and 0 for orthogonal ones
   assertEquals(cosineSimilarity([1, 0], [0, 1]), 0);
 });
 
-Deno.test("resolve mints a stable content-hash ID and absorbs the same name", async () => {
-  const resolver = new EntityResolver();
+Deno.test("resolve generates a stable ID and absorbs the same name", async () => {
+  const resolver = new EntityResolver(undefined, {
+    canonicalIdGenerator: () => "urn:entity:test-001",
+  });
   const first = await resolver.resolve({
     name: "Melanie",
     classIri: "schema:Person",
@@ -37,6 +39,7 @@ Deno.test("resolve mints a stable content-hash ID and absorbs the same name", as
 
   assertEquals(first.matched, false);
   assertEquals(second.matched, true);
+  assertEquals(first.id, "urn:entity:test-001");
   assertEquals(second.id, first.id);
   const entity = await resolver.lookup(first.id);
   assertEquals(entity!.name, "Melanie");
