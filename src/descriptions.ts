@@ -1,5 +1,5 @@
 export const EXECUTE_SPARQL_TOOL_DESCRIPTION =
-  "Execute a SPARQL query against the knowledge graph. Defaults to read-only queries (SELECT, ASK, CONSTRUCT, DESCRIBE).";
+  "Execute a SPARQL query against the knowledge graph. Defaults to read-only queries (SELECT, ASK, CONSTRUCT, DESCRIBE). Use bounded SELECT queries to discover classes and predicates when the schema is unknown.";
 
 export const ENTITY_RESOLUTION_TOOL_DESCRIPTION =
   "Resolve, look up, merge, and count canonical entities across sessions. " +
