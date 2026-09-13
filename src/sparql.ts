@@ -31,7 +31,7 @@ export interface ExecuteSparqlInput {
 const ExecuteSparqlInput: z.ZodType<ExecuteSparqlInput, ExecuteSparqlInput> = z
   .object({
     query: z.string().describe(
-      "The SPARQL query string to execute. Read-only queries (SELECT, ASK, CONSTRUCT, DESCRIBE) are allowed by default.",
+      "The SPARQL query string to execute. Read-only queries (SELECT, ASK, CONSTRUCT, DESCRIBE) are allowed by default. Always include a bounded LIMIT.",
     ),
     baseIri: z.string().optional().describe("Base IRI for query execution."),
     timeoutMs: z.number().optional().describe(
