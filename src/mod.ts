@@ -4,7 +4,7 @@ import type { WorldsTool } from "./tool-result.ts";
 import { createExecuteSparqlTool } from "./sparql.ts";
 import type { ExecuteSparqlInput } from "./sparql.ts";
 import { createSearchWorldTool } from "./search.ts";
-import type { SearchToolInput } from "./search.ts";
+import type { SearchToolInput, SearchWorldOptions } from "./search.ts";
 import { createImportRdfTool } from "./import.ts";
 import type { ImportRdfInput } from "./import.ts";
 import { createExportRdfTool } from "./export.ts";
@@ -16,6 +16,7 @@ import type { ResolveEntityInput } from "./entity-resolution-tool.ts";
 
 export { createExecuteSparqlTool } from "./sparql.ts";
 export { createSearchWorldTool } from "./search.ts";
+export type { SearchWorldOptions, SearchWorldRerankOptions } from "./search.ts";
 export { createImportRdfTool } from "./import.ts";
 export { createExportRdfTool } from "./export.ts";
 export { createReindexWorldTool } from "./reindex.ts";
@@ -41,6 +42,12 @@ export * from "./descriptions.ts";
 export interface CreateToolsConfig {
   client?: WorldsSdkInterface;
   sparqlOptions?: { allowUpdates?: boolean };
+
+  /**
+   * searchOptions defines configuration overrides for the searchWorld tool,
+   * including optional two-stage retrieval (rerank) settings.
+   */
+  searchOptions?: SearchWorldOptions;
   entityResolver?: EntityResolver;
 }
 
@@ -87,7 +94,7 @@ function entityTool(config: CreateToolsConfig):
 export function createTools(config: CreateToolsConfig): CreateToolsResult {
   const client = requireClient(config);
   const executeSparql = createExecuteSparqlTool(client, config.sparqlOptions);
-  const searchWorld = createSearchWorldTool(client);
+  const searchWorld = createSearchWorldTool(client, config.searchOptions);
   const importRdf = createImportRdfTool(client);
   const exportRdf = createExportRdfTool(client);
   const reindexWorld = createReindexWorldTool(client);
@@ -107,7 +114,7 @@ export function createRecallTools(
   const client = requireClient(config);
   return {
     executeSparql: createExecuteSparqlTool(client, { allowUpdates: false }),
-    searchWorld: createSearchWorldTool(client),
+    searchWorld: createSearchWorldTool(client, config.searchOptions),
   };
 }
 
