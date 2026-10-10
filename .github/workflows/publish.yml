@@ -21,6 +21,7 @@ jobs:
         run: |
           VERSION=$(jq -r .version deno.json)
           if curl -sf https://jsr.io/@wazoo/tools/meta.json | jq -e ".versions[\"$VERSION\"]" > /dev/null; then
+            echo "::notice::Version $VERSION of @wazoo/tools is already on JSR; nothing to publish. Bump the version in deno.json to release."
             echo "already-published=true" >> "$GITHUB_OUTPUT"
           else
             echo "already-published=false" >> "$GITHUB_OUTPUT"
