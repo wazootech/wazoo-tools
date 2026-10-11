@@ -15,7 +15,7 @@ bunx jsr add @wazoo/tools
 
 ```typescript
 import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { google } from "@ai-sdk/google";
 import { WorldsSdk } from "@worlds/sdk";
 import { MemoryStore, WazooSparqlEngine } from "@wazoo/sparql-engine";
 import { RdfjsQuadStore, RdfjsSearchIndex } from "@worlds/sdk/rdfjs";
@@ -33,7 +33,7 @@ const tools = createTools({
 });
 
 const { text } = await generateText({
-  model: openai("gpt-4o"),
+  model: google("gemini-3.8-flash"),
   tools,
   prompt:
     "Find all entities in the knowledge base and describe their relations.",
