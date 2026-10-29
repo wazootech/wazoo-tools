@@ -142,7 +142,6 @@ Deno.test("createResolveEntityTool exposes resolve, lookup, merge, and stats", a
   const resolver = new EntityResolver();
   const tool = createResolveEntityTool(resolver);
 
-  // @ts-ignore testing tool execution directly
   const resolved = await tool.execute!(
     {
       operation: "resolve",
@@ -154,7 +153,6 @@ Deno.test("createResolveEntityTool exposes resolve, lookup, merge, and stats", a
 
   assertEquals(resolved.success, true);
 
-  // @ts-ignore testing tool execution directly
   const looked = await tool.execute!(
     { operation: "lookup", id: resolved.data!.id },
     { toolCallId: "2", messages: [], context: {} },
@@ -162,14 +160,12 @@ Deno.test("createResolveEntityTool exposes resolve, lookup, merge, and stats", a
   assertEquals(looked.success, true);
   assertEquals(looked.data!.name, "Melanie");
 
-  // @ts-ignore testing tool execution directly
   const stats = await tool.execute!(
     { operation: "stats" },
     { toolCallId: "3", messages: [], context: {} },
   ) as { success: boolean; data?: { entities: number } };
   assertEquals(stats.data!.entities, 1);
 
-  // @ts-ignore testing tool execution directly
   const bad = await tool.execute!(
     { operation: "resolve" },
     { toolCallId: "4", messages: [], context: {} },
