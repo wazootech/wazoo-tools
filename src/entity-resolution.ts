@@ -28,122 +28,28 @@
  *   session are different entities by construction, never merged.
  */
 
-/** Embedding function contract satisfied by Worlds/OpenAI embedding services. */
-export type EmbeddingFn = (input: string) => Promise<number[]>;
+import { InMemoryEntityStore, newEntity } from "./entity-store.ts";
+import { withDefaults } from "./entity-options.ts";
+import { findBestMatch } from "./entity-matching.ts";
+import { normalizeName } from "./entity-similarity.ts";
+import type {
+  EntityInput,
+  EntityResolverOptions,
+  EntityStore,
+  ResolvedEntity,
+} from "./entity-types.ts";
 
-export type CanonicalIdGenerator = () => string;
-
-/** Optional deterministic guards evaluated before any similarity scoring. */
-export interface EntityResolverOptions {
-  /** Cosine threshold above which two candidates are the same entity (0–1). */
-  threshold?: number;
-  /**
-   * Normalized string-containment score for the no-embedding fallback.
-   * Must be >= threshold for containment matches to merge; defaults to
-   * 0.9 so alias containment ("Harborview" ⊂ "Harborview Medical Center")
-   * passes the default 0.9 resolution gate.
-   */
-  stringThreshold?: number;
-  /** Co-ref predicate for confirmed merges (default skos:exactMatch). */
-  exactMatchIri?: string;
-  /** Co-ref predicate for near matches (default skos:closeMatch). */
-  closeMatchIri?: string;
-  /** Generates a fresh canonical identifier. IDs are never derived from mutable entity attributes. */
-  canonicalIdGenerator?: CanonicalIdGenerator;
-}
-
-export interface EntityInput {
-  /** Display name of the candidate entity ("Melanie", "Harborview"). */
-  name: string;
-  /** Entity class IRI (schema:Person, schema:Organization, …). */
-  classIri?: string;
-  /** Precomputed embedding for the name; resolution falls back to strings. */
-  embedding?: number[];
-  /** Session-scoped URN this candidate was minted under, if any. */
-  scopedUrn?: string;
-  /** Session the candidate was extracted from (sameSessionGuard input). */
-  sessionId?: string;
-  /** Free-form provider metadata persisted verbatim on the entity. */
-  metadata?: Record<string, unknown>;
-}
-
-export interface ResolvedEntity {
-  /** Stable canonical ID generated once and persisted with the entity. */
-  id: string;
-  /** Best-known display name for the canonical entity. */
-  name: string;
-  /** Entity class IRI, when known. */
-  classIri?: string;
-  /** true when an existing canonical entity absorbed this candidate. */
-  matched: boolean;
-  /** Cosine/string score of the match; undefined for brand-new entities. */
-  score?: number;
-  /** skos predicate IRI recorded for the co-reference edge, if any. */
-  matchPredicate?: string;
-}
-
-/** Durable canonical entity record used by graph-backed stores. */
-export interface StoredEntity {
-  id: string;
-  name: string;
-  classIri?: string;
-  embedding?: number[];
-  /** Normalized alias -> scoped URN or canonical ID. */
-  aliases: Map<string, string>;
-  /** Session IDs this entity was observed in. */
-  sessions: Set<string>;
-  metadata?: Record<string, unknown>;
-}
-
-export interface EntityStore {
-  get(id: string): Promise<StoredEntity | undefined>;
-  put(entity: StoredEntity): Promise<void>;
-  /** All stored entities (implementations may page; correctness > scale here). */
-  list(): Promise<StoredEntity[]>;
-  /** Persist a typed co-reference edge when the store supports graph links. */
-  recordLink?(
-    canonicalId: string,
-    scopedUrn: string,
-    predicateIri: string,
-  ): Promise<void>;
-}
-
-/** In-memory EntityStore — default for tests and single-process usage. */
-export class InMemoryEntityStore implements EntityStore {
-  #entities = new Map<string, StoredEntity>();
-
-  get(id: string): Promise<StoredEntity | undefined> {
-    return Promise.resolve(this.#entities.get(id));
-  }
-
-  put(entity: StoredEntity): Promise<void> {
-    this.#entities.set(entity.id, entity);
-    return Promise.resolve();
-  }
-
-  list(): Promise<StoredEntity[]> {
-    return Promise.resolve([...this.#entities.values()]);
-  }
-}
-
-export function normalizeName(name: string): string {
-  return name.trim().toLowerCase().replace(/\s+/g, " ");
-}
-
-/** Cosine similarity of two equal- or different-length numeric vectors. */
-export function cosineSimilarity(a: number[], b: number[]): number {
-  let dot = 0;
-  let magA = 0;
-  let magB = 0;
-  const len = Math.min(a.length, b.length);
-  for (let i = 0; i < len; i++) {
-    dot += a[i] * b[i];
-    magA += a[i] * a[i];
-    magB += b[i] * b[i];
-  }
-  if (magA === 0 || magB === 0) return 0;
-  return dot / (Math.sqrt(magA) * Math.sqrt(magB));
-}
+export { InMemoryEntityStore } from "./entity-store.ts";
+export { cosineSimilarity, normalizeName } from "./entity-similarity.ts";
+export type {
+  CanonicalIdGenerator,
+  EmbeddingFn,
+  EntityInput,
+  EntityResolverOptions,
+  EntityStore,
+  ResolvedEntity,
+  StoredEntity,
+} from "./entity-types.ts";
 
 export class EntityResolver {
   readonly #store: EntityStore;
@@ -154,16 +60,7 @@ export class EntityResolver {
     options?: EntityResolverOptions,
   ) {
     this.#store = store;
-    this.#options = {
-      threshold: options?.threshold ?? 0.9,
-      stringThreshold: options?.stringThreshold ?? 0.9,
-      exactMatchIri: options?.exactMatchIri ??
-        "http://www.w3.org/2004/02/skos/core#exactMatch",
-      closeMatchIri: options?.closeMatchIri ??
-        "http://www.w3.org/2004/02/skos/core#closeMatch",
-      canonicalIdGenerator: options?.canonicalIdGenerator ??
-        (() => `urn:entity:${crypto.randomUUID()}`),
-    };
+    this.#options = withDefaults(options);
   }
 
   /**
@@ -176,36 +73,12 @@ export class EntityResolver {
     const normalized = normalizeName(input.name);
     if (!normalized) throw new Error("EntityInput.name must be non-empty");
 
-    let best: { entity: StoredEntity; score: number } | undefined;
-
-    for (const entity of await this.#store.list()) {
-      if (
-        input.classIri && entity.classIri && input.classIri !== entity.classIri
-      ) {
-        continue; // classGuard: never merge across schema classes
-      }
-      if (
-        input.sessionId && entity.sessions.size === 1 &&
-        entity.sessions.has(input.sessionId)
-      ) {
-        continue; // sameSessionGuard: one session never holds two entities
-      }
-
-      let score: number | undefined;
-      if (input.embedding && entity.embedding) {
-        score = cosineSimilarity(input.embedding, entity.embedding);
-      } else {
-        const a = normalized;
-        const b = normalizeName(entity.name);
-        score = a === b
-          ? 1
-          : a.includes(b) || b.includes(a)
-          ? this.#options.stringThreshold
-          : undefined;
-      }
-      if (score === undefined || score < this.#options.threshold) continue;
-      if (!best || score > best.score) best = { entity, score };
-    }
+    const best = findBestMatch(
+      await this.#store.list(),
+      input,
+      normalized,
+      this.#options,
+    );
 
     if (best) {
       const { entity, score } = best;
@@ -241,15 +114,7 @@ export class EntityResolver {
     for (let n = 2; await this.#store.get(id); n++) {
       id = `${baseId}:${n}`;
     }
-    const entity: StoredEntity = {
-      id,
-      name: input.name.trim(),
-      classIri: input.classIri,
-      embedding: input.embedding,
-      aliases: new Map(),
-      sessions: new Set(input.sessionId ? [input.sessionId] : []),
-      metadata: input.metadata,
-    };
+    const entity = newEntity(id, input);
     if (input.scopedUrn) entity.aliases.set(normalized, input.scopedUrn);
     await this.#store.put(entity);
     if (input.scopedUrn && this.#store.recordLink) {
