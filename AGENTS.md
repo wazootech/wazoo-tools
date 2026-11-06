@@ -23,6 +23,7 @@ this repo's specifics:
 - Workflow actions are pinned to full commit SHAs with a version comment, Deno
   is pinned to `v2.9.8`, and CI installs with `deno install --frozen`, so commit
   any `deno.lock` change.
-- `code-health.yml` only warns: files over 120 lines of code (300 for tests) and
-  `TODO`/`FIXME` without an issue link. There are no exclusions.
+- `code-health.yml` enforces file length (120 lines of code per source file, 300
+  per test; blank, comment, and import/re-export lines excluded; no allowlisted
+  exceptions) and warns on `TODO`/`FIXME` without an issue link.
 - `.github/CODEOWNERS` routes review to the repo owner.
