@@ -2,6 +2,7 @@ import type { SparqlRequest, SparqlResponse } from "@worlds/sdk/sparql-engine";
 import { type WorldsTool, worldsTool } from "./tool-result.ts";
 import { EXECUTE_SPARQL_TOOL_DESCRIPTION } from "./descriptions.ts";
 import { z } from "zod";
+import { isReadOnlySparql } from "./sparql-guard.ts";
 
 /**
  * ExecuteSparqlOptions defines the configuration options for the executeSparql tool.
@@ -49,7 +50,7 @@ export function createExecuteSparqlTool(
     execute: async (request: ExecuteSparqlInput) => {
       const allowUpdates = options?.allowUpdates ?? false;
       if (!allowUpdates) {
-        if (/\b(INSERT|DELETE|DROP|CLEAR|LOAD|CREATE)\b/i.test(request.query)) {
+        if (!isReadOnlySparql(request.query, request.baseIri)) {
           return {
             success: false,
             error:
