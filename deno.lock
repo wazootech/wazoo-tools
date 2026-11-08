@@ -573,6 +573,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@^1.0.19",
+      "jsr:@wazoo/sparql-engine@~0.4.1",
       "jsr:@worlds/sdk@0.9",
       "npm:@ai-sdk/provider@^4.0.10",
       "npm:@rdfjs/types@^2.0.1",
