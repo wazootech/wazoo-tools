@@ -9,6 +9,10 @@
     "./export": "./src/export.ts"
   },
   "nodeModulesDir": "none",
+  "minimumDependencyAge": {
+    "age": "P1D",
+    "exclude": ["jsr:@worlds/sdk", "jsr:@wazoo/sparql-engine"]
+  },
   "imports": {
     "@std/assert": "jsr:@std/assert@^1.0.19",
     "ai": "npm:ai@^7.0.93",
