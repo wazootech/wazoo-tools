@@ -6,7 +6,8 @@ platforms.
 ## Commands
 
 - `deno task check` - Type check Deno module targets.
-- `deno task test` - Run unit tests.
+- `deno task test` - Run unit tests (they use `node:test`, so `bun test` runs
+  the same files).
 
 ## Code health
 
