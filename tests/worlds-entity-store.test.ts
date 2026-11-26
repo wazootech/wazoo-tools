@@ -42,9 +42,9 @@ test("WorldsEntityStore persists canonical entities and co-reference links as RD
   assert.deepStrictEqual(imports.length, 2);
   assert.ok(imports[0].includes("identity:CanonicalEntity"));
   assert.ok(imports[0].includes("urn:entity:generated-1"));
-  assert.ok(imports[1].includes(
-    "http://www.w3.org/2004/02/skos/core#exactMatch",
-  ));
+  assert.ok(
+    imports[1].includes("http://www.w3.org/2004/02/skos/core#exactMatch"),
+  );
 
   const found = await store.get("urn:entity:generated-1");
   assert.deepStrictEqual(found?.name, "Melanie");

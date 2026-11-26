@@ -15,8 +15,7 @@ export class WorldsEntityStore implements EntityStore {
   async get(id: string): Promise<StoredEntity | undefined> {
     const entity = safeIri(id);
     const response = await this.client.sparql({
-      query:
-        `${PREFIXES}\nSELECT ?name ?class ?alias ?aliasUrn ?session ?embedding ?metadata WHERE {
+      query: `${PREFIXES}\nSELECT ?name ?class ?alias ?aliasUrn ?session ?embedding ?metadata WHERE {
         ${entity} a identity:CanonicalEntity ; schema:name ?name .
         OPTIONAL { ${entity} a ?class . FILTER(?class != identity:CanonicalEntity) }
         OPTIONAL { ${entity} skos:altLabel ?alias . OPTIONAL { ${entity} identity:aliasUrn ?aliasUrn } }
@@ -31,52 +30,50 @@ export class WorldsEntityStore implements EntityStore {
 
   async list(): Promise<StoredEntity[]> {
     const response = await this.client.sparql({
-      query:
-        `${PREFIXES}\nSELECT ?entity WHERE { ?entity a identity:CanonicalEntity }`,
+      query: `${PREFIXES}\nSELECT ?entity WHERE { ?entity a identity:CanonicalEntity }`,
     });
     const ids = [
       ...new Set(bindings(response).map((row) => value(row, "entity"))),
-    ]
-      .filter((id): id is string => Boolean(id));
+    ].filter((id): id is string => Boolean(id));
     const entities = await Promise.all(ids.map((id) => this.get(id)));
     return entities.filter((entity): entity is StoredEntity => Boolean(entity));
   }
 
   async put(entity: StoredEntity): Promise<void> {
     const lines = [
-      `${safeIri(entity.id)} a identity:CanonicalEntity ; schema:name "${
-        escapeLiteral(entity.name)
-      }" .`,
+      `${safeIri(entity.id)} a identity:CanonicalEntity ; schema:name "${escapeLiteral(
+        entity.name,
+      )}" .`,
     ];
     if (entity.classIri) {
       lines.push(`${safeIri(entity.id)} a ${safeIri(entity.classIri)} .`);
     }
     for (const [alias, scopedUrn] of entity.aliases) {
       lines.push(
-        `${safeIri(entity.id)} skos:altLabel "${
-          escapeLiteral(alias)
-        }" ; identity:aliasUrn ${safeIri(scopedUrn || alias)} .`,
+        `${safeIri(entity.id)} skos:altLabel "${escapeLiteral(
+          alias,
+        )}" ; identity:aliasUrn ${safeIri(scopedUrn || alias)} .`,
       );
     }
     for (const session of entity.sessions) {
       lines.push(
-        `${safeIri(entity.id)} identity:observedIn "${
-          escapeLiteral(session)
-        }" .`,
+        `${safeIri(entity.id)} identity:observedIn "${escapeLiteral(
+          session,
+        )}" .`,
       );
     }
     if (entity.embedding) {
       lines.push(
-        `${safeIri(entity.id)} identity:embeddingJson "${
-          escapeLiteral(JSON.stringify(entity.embedding))
-        }" .`,
+        `${safeIri(entity.id)} identity:embeddingJson "${escapeLiteral(
+          JSON.stringify(entity.embedding),
+        )}" .`,
       );
     }
     if (entity.metadata) {
       lines.push(
-        `${safeIri(entity.id)} identity:metadataJson "${
-          escapeLiteral(JSON.stringify(entity.metadata))
-        }" .`,
+        `${safeIri(entity.id)} identity:metadataJson "${escapeLiteral(
+          JSON.stringify(entity.metadata),
+        )}" .`,
       );
     }
     await this.client.import({
@@ -96,9 +93,9 @@ export class WorldsEntityStore implements EntityStore {
     await this.client.import({
       source: {
         kind: "serialized",
-        data: `${PREFIXES}\n${safeIri(scopedUrn)} ${safeIri(predicateIri)} ${
-          safeIri(canonicalId)
-        } .`,
+        data: `${PREFIXES}\n${safeIri(scopedUrn)} ${safeIri(predicateIri)} ${safeIri(
+          canonicalId,
+        )} .`,
         contentType: "text/turtle",
       },
     });

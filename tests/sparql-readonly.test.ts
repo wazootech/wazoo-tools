@@ -36,8 +36,8 @@ const REJECTED: Record<string, string> = {
   "comment before update": "# SELECT\nMOVE DEFAULT TO <urn:test:x>",
   "prefix then update": "PREFIX t: <urn:test:>\nCOPY t:a TO t:b",
   "multi-operation": "SELECT * WHERE { ?s ?p ?o } ; DROP ALL",
-  "unparseable": "this is not sparql",
-  "empty": "",
+  unparseable: "this is not sparql",
+  empty: "",
 };
 
 for (const [name, query] of Object.entries(REJECTED)) {
@@ -55,7 +55,7 @@ const ACCEPTED: Record<string, string> = {
   DESCRIBE: "DESCRIBE <urn:test:s>",
   "comments and prefixes":
     "# COPY DROP ALL\nPREFIX t: <urn:test:>\nSELECT ?s WHERE { ?s t:p ?o } LIMIT 5",
-  "subquery":
+  subquery:
     "SELECT ?s WHERE { { SELECT ?s WHERE { ?s ?p ?o } LIMIT 3 } } LIMIT 3",
   "keywords in string literals":
     'SELECT ?s WHERE { ?s ?p "COPY MOVE ADD INSERT DELETE DROP" } LIMIT 5',
@@ -74,12 +74,15 @@ for (const [name, query] of Object.entries(ACCEPTED)) {
 
 test("allowUpdates true still forwards updates", async () => {
   let forwarded = 0;
-  const tool = createExecuteSparqlTool({
-    sparql: () => {
-      forwarded++;
-      return Promise.resolve({ kind: "void" } as SparqlResponse);
+  const tool = createExecuteSparqlTool(
+    {
+      sparql: () => {
+        forwarded++;
+        return Promise.resolve({ kind: "void" } as SparqlResponse);
+      },
     },
-  }, { allowUpdates: true });
+    { allowUpdates: true },
+  );
   await tool.execute!(
     { query: REJECTED.COPY },
     { toolCallId: "t", messages: [], context: {} },

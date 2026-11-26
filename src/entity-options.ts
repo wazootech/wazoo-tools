@@ -7,11 +7,14 @@ export function withDefaults(
   return {
     threshold: options?.threshold ?? 0.9,
     stringThreshold: options?.stringThreshold ?? 0.9,
-    exactMatchIri: options?.exactMatchIri ??
+    exactMatchIri:
+      options?.exactMatchIri ??
       "http://www.w3.org/2004/02/skos/core#exactMatch",
-    closeMatchIri: options?.closeMatchIri ??
+    closeMatchIri:
+      options?.closeMatchIri ??
       "http://www.w3.org/2004/02/skos/core#closeMatch",
-    canonicalIdGenerator: options?.canonicalIdGenerator ??
+    canonicalIdGenerator:
+      options?.canonicalIdGenerator ??
       (() => `urn:entity:${crypto.randomUUID()}`),
   };
 }

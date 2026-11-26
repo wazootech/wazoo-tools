@@ -83,9 +83,9 @@ function requireClient(config: CreateToolsConfig): WorldsSdkInterface {
   return config.client;
 }
 
-function entityTool(config: CreateToolsConfig):
-  | { resolveEntity: WorldsTool<ResolveEntityInput> }
-  | Record<string, never> {
+function entityTool(
+  config: CreateToolsConfig,
+): { resolveEntity: WorldsTool<ResolveEntityInput> } | Record<string, never> {
   return config.entityResolver
     ? { resolveEntity: createResolveEntityTool(config.entityResolver) }
     : {};

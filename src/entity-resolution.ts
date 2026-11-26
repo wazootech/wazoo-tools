@@ -88,9 +88,10 @@ export class EntityResolver {
       if (input.classIri && !entity.classIri) entity.classIri = input.classIri;
       if (input.sessionId) entity.sessions.add(input.sessionId);
       if (input.scopedUrn) entity.aliases.set(normalized, input.scopedUrn);
-      const predicate = score >= 0.99
-        ? this.#options.exactMatchIri
-        : this.#options.closeMatchIri;
+      const predicate =
+        score >= 0.99
+          ? this.#options.exactMatchIri
+          : this.#options.closeMatchIri;
       await this.#store.put(entity);
       if (input.scopedUrn && this.#store.recordLink) {
         await this.#store.recordLink(entity.id, input.scopedUrn, predicate);
@@ -141,9 +142,10 @@ export class EntityResolver {
     if (!entity) throw new Error(`Unknown canonical entity: ${canonicalId}`);
     entity.aliases.set(normalizeName(entity.name), scopedUrn);
     await this.#store.put(entity);
-    const predicate = confidence >= 0.99
-      ? this.#options.exactMatchIri
-      : this.#options.closeMatchIri;
+    const predicate =
+      confidence >= 0.99
+        ? this.#options.exactMatchIri
+        : this.#options.closeMatchIri;
     if (this.#store.recordLink) {
       await this.#store.recordLink(canonicalId, scopedUrn, predicate);
     }

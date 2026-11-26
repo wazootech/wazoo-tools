@@ -7,18 +7,20 @@ export interface ReindexWorldInput {
   readPageSize?: number;
 }
 
-const ReindexWorldInput: z.ZodType<ReindexWorldInput, ReindexWorldInput> = z
-  .object({
-    readPageSize: z.number().int().positive().max(10000).optional().describe(
-      "Number of durable quads to scan per page.",
-    ),
+const ReindexWorldInput: z.ZodType<ReindexWorldInput, ReindexWorldInput> =
+  z.object({
+    readPageSize: z
+      .number()
+      .int()
+      .positive()
+      .max(10000)
+      .optional()
+      .describe("Number of durable quads to scan per page."),
   });
 
-export function createReindexWorldTool(
-  client: {
-    reindex(request?: ReindexRequest): Promise<ReindexResponse>;
-  },
-): WorldsTool<ReindexWorldInput> {
+export function createReindexWorldTool(client: {
+  reindex(request?: ReindexRequest): Promise<ReindexResponse>;
+}): WorldsTool<ReindexWorldInput> {
   return worldsTool({
     description: REINDEX_WORLD_TOOL_DESCRIPTION,
     inputSchema: ReindexWorldInput,
