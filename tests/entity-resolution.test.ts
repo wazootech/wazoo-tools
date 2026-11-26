@@ -1,4 +1,5 @@
-import { assertAlmostEquals, assertEquals } from "@std/assert";
+import assert from "node:assert/strict";
+import test from "node:test";
 import { createResolveEntityTool } from "../src/entity-resolution-tool.ts";
 import {
   cosineSimilarity,
@@ -8,19 +9,21 @@ import {
 } from "../src/mod.ts";
 import { createTools } from "../src/mod.ts";
 
-Deno.test("normalizeName lowercases and collapses whitespace", () => {
-  assertEquals(
+test("normalizeName lowercases and collapses whitespace", () => {
+  assert.deepStrictEqual(
     normalizeName("  Harborview   Medical  Center "),
     "harborview medical center",
   );
 });
 
-Deno.test("cosineSimilarity is 1 for identical vectors and 0 for orthogonal ones", () => {
-  assertAlmostEquals(cosineSimilarity([1, 0, 1], [1, 0, 1]), 1, 1e-12);
-  assertEquals(cosineSimilarity([1, 0], [0, 1]), 0);
+test("cosineSimilarity is 1 for identical vectors and 0 for orthogonal ones", () => {
+  assert.ok(
+    Math.abs(cosineSimilarity([1, 0, 1], [1, 0, 1]) - 1) < 1e-12,
+  );
+  assert.deepStrictEqual(cosineSimilarity([1, 0], [0, 1]), 0);
 });
 
-Deno.test("resolve generates a stable ID and absorbs the same name", async () => {
+test("resolve generates a stable ID and absorbs the same name", async () => {
   const resolver = new EntityResolver(undefined, {
     canonicalIdGenerator: () => "urn:entity:test-001",
   });
@@ -37,16 +40,16 @@ Deno.test("resolve generates a stable ID and absorbs the same name", async () =>
     sessionId: "s2",
   });
 
-  assertEquals(first.matched, false);
-  assertEquals(second.matched, true);
-  assertEquals(first.id, "urn:entity:test-001");
-  assertEquals(second.id, first.id);
+  assert.deepStrictEqual(first.matched, false);
+  assert.deepStrictEqual(second.matched, true);
+  assert.deepStrictEqual(first.id, "urn:entity:test-001");
+  assert.deepStrictEqual(second.id, first.id);
   const entity = await resolver.lookup(first.id);
-  assertEquals(entity!.name, "Melanie");
-  assertEquals(entity!.aliases.length, 1); // aliases keyed by normalized name
+  assert.deepStrictEqual(entity!.name, "Melanie");
+  assert.deepStrictEqual(entity!.aliases.length, 1); // aliases keyed by normalized name
 });
 
-Deno.test("alias containment merges 'Harborview' into 'Harborview Medical Center'", async () => {
+test("alias containment merges 'Harborview' into 'Harborview Medical Center'", async () => {
   const resolver = new EntityResolver();
   const org = await resolver.resolve({
     name: "Harborview Medical Center",
@@ -57,12 +60,12 @@ Deno.test("alias containment merges 'Harborview' into 'Harborview Medical Center
     classIri: "schema:Organization",
   });
 
-  assertEquals(short.matched, true);
-  assertEquals(short.id, org.id);
-  assertEquals(short.score, 0.9); // containment fallback score
+  assert.deepStrictEqual(short.matched, true);
+  assert.deepStrictEqual(short.id, org.id);
+  assert.deepStrictEqual(short.score, 0.9); // containment fallback score
 });
 
-Deno.test("classGuard prevents merging entities across schema classes", async () => {
+test("classGuard prevents merging entities across schema classes", async () => {
   const resolver = new EntityResolver();
   const person = await resolver.resolve({
     name: "Harborview",
@@ -75,11 +78,11 @@ Deno.test("classGuard prevents merging entities across schema classes", async ()
 
   // The candidate must NOT be reported as a match, and its ID must be
   // fresh (collision-disambiguated, not the existing entity's ID).
-  assertEquals(org.matched, false);
-  assertEquals(org.id !== person.id, true);
+  assert.deepStrictEqual(org.matched, false);
+  assert.deepStrictEqual(org.id !== person.id, true);
 });
 
-Deno.test("sameSessionGuard prevents merging two entities from one session", async () => {
+test("sameSessionGuard prevents merging two entities from one session", async () => {
   const resolver = new EntityResolver();
   // Two distinct names that both contain "harborview", extracted in one
   // session: they are minted as separate entities and must stay separate.
@@ -94,11 +97,11 @@ Deno.test("sameSessionGuard prevents merging two entities from one session", asy
     sessionId: "s1",
   });
 
-  assertEquals(org.matched, false);
-  assertEquals(org.id !== gala.id, true);
+  assert.deepStrictEqual(org.matched, false);
+  assert.deepStrictEqual(org.id !== gala.id, true);
 });
 
-Deno.test("embedding path merges close vectors and separates distinct ones", async () => {
+test("embedding path merges close vectors and separates distinct ones", async () => {
   const resolver = new EntityResolver(undefined, { threshold: 0.9 });
   const base = await resolver.resolve({
     name: "Melanie",
@@ -114,13 +117,13 @@ Deno.test("embedding path merges close vectors and separates distinct ones", asy
     scopedUrn: "urn:person:s9/x",
   });
 
-  assertEquals(near.matched, true);
-  assertEquals(near.id, base.id);
-  assertEquals(far.matched, false);
-  assertEquals(far.id !== base.id, true);
+  assert.deepStrictEqual(near.matched, true);
+  assert.deepStrictEqual(near.id, base.id);
+  assert.deepStrictEqual(far.matched, false);
+  assert.deepStrictEqual(far.id !== base.id, true);
 });
 
-Deno.test("merge combines alias tables into the surviving entity", async () => {
+test("merge combines alias tables into the surviving entity", async () => {
   const resolver = new EntityResolver();
   const a = await resolver.resolve({
     name: "Anna",
@@ -132,13 +135,13 @@ Deno.test("merge combines alias tables into the surviving entity", async () => {
   });
 
   const merged = await resolver.merge(a.id, b.id);
-  assertEquals(merged, b.id);
+  assert.deepStrictEqual(merged, b.id);
   const entity = (await resolver.lookup(b.id))!;
-  assertEquals(entity.aliases.includes("anna"), true);
-  assertEquals(entity.aliases.includes("anna k."), true);
+  assert.deepStrictEqual(entity.aliases.includes("anna"), true);
+  assert.deepStrictEqual(entity.aliases.includes("anna k."), true);
 });
 
-Deno.test("createResolveEntityTool exposes resolve, lookup, merge, and stats", async () => {
+test("createResolveEntityTool exposes resolve, lookup, merge, and stats", async () => {
   const resolver = new EntityResolver();
   const tool = createResolveEntityTool(resolver);
 
@@ -151,29 +154,29 @@ Deno.test("createResolveEntityTool exposes resolve, lookup, merge, and stats", a
     { toolCallId: "1", messages: [], context: {} },
   ) as { success: boolean; data?: { id: string } };
 
-  assertEquals(resolved.success, true);
+  assert.deepStrictEqual(resolved.success, true);
 
   const looked = await tool.execute!(
     { operation: "lookup", id: resolved.data!.id },
     { toolCallId: "2", messages: [], context: {} },
   ) as { success: boolean; data?: { name: string } };
-  assertEquals(looked.success, true);
-  assertEquals(looked.data!.name, "Melanie");
+  assert.deepStrictEqual(looked.success, true);
+  assert.deepStrictEqual(looked.data!.name, "Melanie");
 
   const stats = await tool.execute!(
     { operation: "stats" },
     { toolCallId: "3", messages: [], context: {} },
   ) as { success: boolean; data?: { entities: number } };
-  assertEquals(stats.data!.entities, 1);
+  assert.deepStrictEqual(stats.data!.entities, 1);
 
   const bad = await tool.execute!(
     { operation: "resolve" },
     { toolCallId: "4", messages: [], context: {} },
   ) as { success: boolean; error?: string };
-  assertEquals(bad.success, false);
+  assert.deepStrictEqual(bad.success, false);
 });
 
-Deno.test("createTools adds resolveEntity when an entityResolver is supplied", () => {
+test("createTools adds resolveEntity when an entityResolver is supplied", () => {
   const mockClient = {
     sparql: () => Promise.resolve({ kind: "bindings", data: [] }),
     search: () => Promise.resolve({}),
@@ -185,7 +188,7 @@ Deno.test("createTools adds resolveEntity when an entityResolver is supplied", (
       typeof createTools
     >[0]["client"],
   });
-  assertEquals("resolveEntity" in without, false);
+  assert.deepStrictEqual("resolveEntity" in without, false);
 
   const withER = createTools({
     client: mockClient as unknown as Parameters<
@@ -193,5 +196,5 @@ Deno.test("createTools adds resolveEntity when an entityResolver is supplied", (
     >[0]["client"],
     entityResolver: new EntityResolver(new InMemoryEntityStore()),
   });
-  assertEquals("resolveEntity" in withER, true);
+  assert.deepStrictEqual("resolveEntity" in withER, true);
 });
