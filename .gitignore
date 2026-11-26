@@ -9,5 +9,6 @@ yarn-error.log*
 dist/
 coverage/
 .deno/
-# dependencies
+# jsr publish regenerates a Deno lockfile; the Bun lockfile is bun.lock
+deno.lock
 node_modules/
