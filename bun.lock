@@ -7,7 +7,7 @@
       "dependencies": {
         "@ai-sdk/provider": "^4.0.10",
         "@rdfjs/types": "^2.0.1",
-        "@wazoo/sparql-engine": "npm:@jsr/wazoo__sparql-engine@^0.4.1",
+        "@wazoo/sparql-engine": "npm:@jsr/wazoo__sparql-engine@^0.5.1",
         "@worlds/sdk": "npm:@jsr/worlds__sdk@^0.9.0",
         "ai": "^7.0.93",
         "zod": "^4.5.4",
@@ -112,7 +112,7 @@
 
     "@vercel/oidc": ["@vercel/oidc@3.2.0", "", {}, "sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug=="],
 
-    "@wazoo/sparql-engine": ["@jsr/wazoo__sparql-engine@0.4.4", "https://npm.jsr.io/~/11/@jsr/wazoo__sparql-engine/0.4.4.tgz", { "dependencies": { "@rdfjs/types": "^2.0.1" } }, "sha512-Qk6Sj1LyLQvyzA12cYOSuHN5hvJnr/BJPCyHsWAXFkKuifVV/t+trfLKaxbL8BHq3znDW6bL5uB0P39qfy9yIA=="],
+    "@wazoo/sparql-engine": ["@jsr/wazoo__sparql-engine@0.5.1", "https://npm.jsr.io/~/11/@jsr/wazoo__sparql-engine/0.5.1.tgz", { "dependencies": { "@rdfjs/types": "^2.0.1" } }, "sha512-moFAPS6D61w6gVNLCf+eG5kPhlBrWKzQ6OQMgcWZAqm8GxDH6Z9XMucDhUnX1ugszhaeKkokeJUJmv4tzmKj6Q=="],
 
     "@webgpu/types": ["@webgpu/types@0.1.38", "", {}, "sha512-7LrhVKz2PRh+DD7+S+PVaFd5HxaWQvoMqBbsV9fNJO1pjUs1P8bM2vQVNfk+3URTqbuTI7gkXi0rfsN0IadoBA=="],
 
