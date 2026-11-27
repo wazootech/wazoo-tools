@@ -1,8 +1,9 @@
-import { assertEquals, assertStringIncludes } from "@std/assert";
+import assert from "node:assert/strict";
+import test from "node:test";
 import type { WorldsSdkInterface } from "@worlds/sdk";
 import { WorldsEntityStore } from "../src/mod.ts";
 
-Deno.test("WorldsEntityStore persists canonical entities and co-reference links as RDF", async () => {
+test("WorldsEntityStore persists canonical entities and co-reference links as RDF", async () => {
   const imports: string[] = [];
   const client = {
     import: (request: { source: { data: string } }) => {
@@ -38,16 +39,15 @@ Deno.test("WorldsEntityStore persists canonical entities and co-reference links 
     "http://www.w3.org/2004/02/skos/core#exactMatch",
   );
 
-  assertEquals(imports.length, 2);
-  assertStringIncludes(imports[0], "identity:CanonicalEntity");
-  assertStringIncludes(imports[0], "urn:entity:generated-1");
-  assertStringIncludes(
-    imports[1],
+  assert.deepStrictEqual(imports.length, 2);
+  assert.ok(imports[0].includes("identity:CanonicalEntity"));
+  assert.ok(imports[0].includes("urn:entity:generated-1"));
+  assert.ok(imports[1].includes(
     "http://www.w3.org/2004/02/skos/core#exactMatch",
-  );
+  ));
 
   const found = await store.get("urn:entity:generated-1");
-  assertEquals(found?.name, "Melanie");
-  assertEquals(found?.classIri, "http://schema.org/Person");
-  assertEquals(found?.sessions.has("s1"), true);
+  assert.deepStrictEqual(found?.name, "Melanie");
+  assert.deepStrictEqual(found?.classIri, "http://schema.org/Person");
+  assert.deepStrictEqual(found?.sessions.has("s1"), true);
 });

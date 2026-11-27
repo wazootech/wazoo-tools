@@ -1,4 +1,5 @@
-import { assertEquals } from "@std/assert";
+import assert from "node:assert/strict";
+import test from "node:test";
 import type {
   SearchRequest,
   SearchResponse,
@@ -92,7 +93,7 @@ function resultIds(
   return (res.data?.results ?? []).map((r) => r.id);
 }
 
-Deno.test(
+test(
   "searchWorld passes the raw response through when no rerank option is given",
   async () => {
     const { client, requests } = mockSearchClient([
@@ -104,20 +105,20 @@ Deno.test(
       { query: "hello" },
       { toolCallId: "r0", messages: [], context: {} },
     )) as { success: boolean; data?: SearchResponse; warning?: string };
-    assertEquals(res.success, true);
-    assertEquals(res.data, {
+    assert.deepStrictEqual(res.success, true);
+    assert.deepStrictEqual(res.data, {
       results: [
         searchResult("a", "a-doc", 0.9),
         searchResult("b", "b-doc", 0.5),
       ],
     });
-    assertEquals(res.warning, undefined);
+    assert.deepStrictEqual(res.warning, undefined);
     // Pass-through must not inject a topK into the request.
-    assertEquals(requests, [{ query: "hello" }]);
+    assert.deepStrictEqual(requests, [{ query: "hello" }]);
   },
 );
 
-Deno.test(
+test(
   "searchWorld reranks and annotates results when configured",
   async () => {
     const { client } = mockSearchClient([
@@ -134,20 +135,20 @@ Deno.test(
       success: boolean;
       data?: { results?: RerankedSearchResult[] };
     };
-    assertEquals(res.success, true);
-    assertEquals(resultIds(res), ["c", "a", "b"]);
-    assertEquals(
+    assert.deepStrictEqual(res.success, true);
+    assert.deepStrictEqual(resultIds(res), ["c", "a", "b"]);
+    assert.deepStrictEqual(
       (res.data?.results ?? []).map((r) => r.rerankScore),
       [0.95, 0.6, 0.2],
     );
     // The reranker saw the literal texts as documents, plus the query.
-    assertEquals(calls.length, 1);
-    assertEquals(calls[0].documents, ["a-doc", "b-doc", "c-doc"]);
-    assertEquals(calls[0].query, "who works here");
+    assert.deepStrictEqual(calls.length, 1);
+    assert.deepStrictEqual(calls[0].documents, ["a-doc", "b-doc", "c-doc"]);
+    assert.deepStrictEqual(calls[0].query, "who works here");
   },
 );
 
-Deno.test(
+test(
   "searchWorld cuts results to topN after reranking",
   async () => {
     const { client } = mockSearchClient([
@@ -163,12 +164,12 @@ Deno.test(
       { query: "q" },
       { toolCallId: "r2", messages: [], context: {} },
     )) as { success: boolean; data?: SearchResponse };
-    assertEquals(res.success, true);
-    assertEquals(resultIds(res), ["b", "c"]);
+    assert.deepStrictEqual(res.success, true);
+    assert.deepStrictEqual(resultIds(res), ["b", "c"]);
   },
 );
 
-Deno.test(
+test(
   "searchWorld recalls generously via topK when rerank.recall is set",
   async () => {
     const { client, requests } = mockSearchClient([
@@ -184,12 +185,12 @@ Deno.test(
       { toolCallId: "r3", messages: [], context: {} },
     );
     // Recall topK is injected into the search request; filters pass through.
-    assertEquals(requests, [{ query: "q", topK: 25 }]);
-    assertEquals(calls.length, 1);
+    assert.deepStrictEqual(requests, [{ query: "q", topK: 25 }]);
+    assert.deepStrictEqual(calls.length, 1);
   },
 );
 
-Deno.test(
+test(
   "searchWorld falls back to un-reranked results when the reranker fails",
   async () => {
     const { client } = mockSearchClient([
@@ -211,16 +212,16 @@ Deno.test(
     )) as { success: boolean; data?: SearchResponse; warning?: string };
     // Graceful degradation: the tool call still succeeds, ordering is
     // un-reranked, and a non-fatal warning explains what happened.
-    assertEquals(res.success, true);
-    assertEquals(resultIds(res), ["a", "b"]);
-    assertEquals(
+    assert.deepStrictEqual(res.success, true);
+    assert.deepStrictEqual(resultIds(res), ["a", "b"]);
+    assert.deepStrictEqual(
       res.warning,
       "rerank failed; returning un-reranked results: reranker outage",
     );
   },
 );
 
-Deno.test(
+test(
   "searchWorld skips the rerank call for short result sets",
   async () => {
     const { client } = mockSearchClient([searchResult("a", "a-doc", 0.9)]);
@@ -230,26 +231,26 @@ Deno.test(
       { query: "q" },
       { toolCallId: "r5", messages: [], context: {} },
     )) as { success: boolean; data?: SearchResponse; warning?: string };
-    assertEquals(res.success, true);
-    assertEquals(calls.length, 0);
-    assertEquals(resultIds(res), ["a"]);
-    assertEquals(res.warning, undefined);
+    assert.deepStrictEqual(res.success, true);
+    assert.deepStrictEqual(calls.length, 0);
+    assert.deepStrictEqual(resultIds(res), ["a"]);
+    assert.deepStrictEqual(res.warning, undefined);
   },
 );
 
-Deno.test("searchWorld input schema exposes topK/minScore to callers", () => {
+test("searchWorld input schema exposes topK/minScore to callers", () => {
   const parsed = SearchToolInput.parse({
     query: "q",
     topK: 10,
     minScore: 0.5,
     include: { predicates: ["schema:name"] },
   });
-  assertEquals(parsed.topK, 10);
-  assertEquals(parsed.minScore, 0.5);
-  assertEquals(parsed.include, { predicates: ["schema:name"] });
+  assert.deepStrictEqual(parsed.topK, 10);
+  assert.deepStrictEqual(parsed.minScore, 0.5);
+  assert.deepStrictEqual(parsed.include, { predicates: ["schema:name"] });
 });
 
-Deno.test("searchWorld passes topK/minScore through to the SDK request", async () => {
+test("searchWorld passes topK/minScore through to the SDK request", async () => {
   const { client, requests } = mockSearchClient([
     searchResult("a", "a-doc", 0.9),
     searchResult("b", "b-doc", 0.5),
@@ -259,5 +260,5 @@ Deno.test("searchWorld passes topK/minScore through to the SDK request", async (
     { query: "q", topK: 10, minScore: 0.5 },
     { toolCallId: "r6", messages: [], context: {} },
   );
-  assertEquals(requests, [{ query: "q", topK: 10, minScore: 0.5 }]);
+  assert.deepStrictEqual(requests, [{ query: "q", topK: 10, minScore: 0.5 }]);
 });

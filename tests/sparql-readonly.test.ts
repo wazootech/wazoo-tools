@@ -1,4 +1,5 @@
-import { assertEquals } from "@std/assert";
+import assert from "node:assert/strict";
+import test from "node:test";
 import { createExecuteSparqlTool } from "../src/mod.ts";
 import type { SparqlResponse } from "@worlds/sdk/sparql-engine";
 
@@ -40,10 +41,10 @@ const REJECTED: Record<string, string> = {
 };
 
 for (const [name, query] of Object.entries(REJECTED)) {
-  Deno.test(`read-only executeSparql rejects ${name}`, async () => {
+  test(`read-only executeSparql rejects ${name}`, async () => {
     const { res, forwarded } = await run(query);
-    assertEquals(res.success, false);
-    assertEquals(forwarded, 0);
+    assert.deepStrictEqual(res.success, false);
+    assert.deepStrictEqual(forwarded, 0);
   });
 }
 
@@ -64,14 +65,14 @@ const ACCEPTED: Record<string, string> = {
 };
 
 for (const [name, query] of Object.entries(ACCEPTED)) {
-  Deno.test(`read-only executeSparql accepts ${name}`, async () => {
+  test(`read-only executeSparql accepts ${name}`, async () => {
     const { res, forwarded } = await run(query);
-    assertEquals(res.success, true);
-    assertEquals(forwarded, 1);
+    assert.deepStrictEqual(res.success, true);
+    assert.deepStrictEqual(forwarded, 1);
   });
 }
 
-Deno.test("allowUpdates true still forwards updates", async () => {
+test("allowUpdates true still forwards updates", async () => {
   let forwarded = 0;
   const tool = createExecuteSparqlTool({
     sparql: () => {
@@ -83,5 +84,5 @@ Deno.test("allowUpdates true still forwards updates", async () => {
     { query: REJECTED.COPY },
     { toolCallId: "t", messages: [], context: {} },
   );
-  assertEquals(forwarded, 1);
+  assert.deepStrictEqual(forwarded, 1);
 });
