@@ -19,35 +19,49 @@ export interface ResolveEntityInput {
   targetId?: string;
 }
 
-const ResolveEntityInput: z.ZodType<ResolveEntityInput, ResolveEntityInput> = z
-  .object({
-    operation: z.enum(["resolve", "lookup", "merge", "stats"]).describe(
-      "Resolution operation to perform.",
-    ),
-    name: z.string().optional().describe(
-      "Candidate entity display name (required for resolve).",
-    ),
-    classIri: z.string().optional().describe(
-      "Entity class IRI, e.g. schema:Person (resolve only).",
-    ),
-    embedding: z.array(z.number()).optional().describe(
-      "Precomputed embedding of the name (resolve only; string fallback applies when omitted).",
-    ),
-    scopedUrn: z.string().optional().describe(
-      "Session-scoped URN to link to the canonical entity (resolve only).",
-    ),
-    sessionId: z.string().optional().describe(
-      "Extraction session ID (resolve only; enables the same-session guard).",
-    ),
-    id: z.string().optional().describe(
-      "Canonical entity ID (required for lookup; merge target).",
-    ),
-    sourceId: z.string().optional().describe(
-      "Canonical entity ID to merge away (required for merge).",
-    ),
-    targetId: z.string().optional().describe(
-      "Canonical entity ID to merge into (required for merge).",
-    ),
+const ResolveEntityInput: z.ZodType<ResolveEntityInput, ResolveEntityInput> =
+  z.object({
+    operation: z
+      .enum(["resolve", "lookup", "merge", "stats"])
+      .describe("Resolution operation to perform."),
+    name: z
+      .string()
+      .optional()
+      .describe("Candidate entity display name (required for resolve)."),
+    classIri: z
+      .string()
+      .optional()
+      .describe("Entity class IRI, e.g. schema:Person (resolve only)."),
+    embedding: z
+      .array(z.number())
+      .optional()
+      .describe(
+        "Precomputed embedding of the name (resolve only; string fallback applies when omitted).",
+      ),
+    scopedUrn: z
+      .string()
+      .optional()
+      .describe(
+        "Session-scoped URN to link to the canonical entity (resolve only).",
+      ),
+    sessionId: z
+      .string()
+      .optional()
+      .describe(
+        "Extraction session ID (resolve only; enables the same-session guard).",
+      ),
+    id: z
+      .string()
+      .optional()
+      .describe("Canonical entity ID (required for lookup; merge target)."),
+    sourceId: z
+      .string()
+      .optional()
+      .describe("Canonical entity ID to merge away (required for merge)."),
+    targetId: z
+      .string()
+      .optional()
+      .describe("Canonical entity ID to merge into (required for merge)."),
   });
 
 export function createResolveEntityTool(

@@ -29,15 +29,15 @@ export interface ExecuteSparqlInput {
   timeoutMs?: number;
 }
 
-const ExecuteSparqlInput: z.ZodType<ExecuteSparqlInput, ExecuteSparqlInput> = z
-  .object({
-    query: z.string().describe(
-      "The SPARQL query string to execute. Read-only queries (SELECT, ASK, CONSTRUCT, DESCRIBE) are allowed by default. Always include a bounded LIMIT.",
-    ),
+const ExecuteSparqlInput: z.ZodType<ExecuteSparqlInput, ExecuteSparqlInput> =
+  z.object({
+    query: z
+      .string()
+      .describe(
+        "The SPARQL query string to execute. Read-only queries (SELECT, ASK, CONSTRUCT, DESCRIBE) are allowed by default. Always include a bounded LIMIT.",
+      ),
     baseIri: z.string().optional().describe("Base IRI for query execution."),
-    timeoutMs: z.number().optional().describe(
-      "Query timeout in milliseconds.",
-    ),
+    timeoutMs: z.number().optional().describe("Query timeout in milliseconds."),
   });
 
 export function createExecuteSparqlTool(
@@ -63,9 +63,10 @@ export function createExecuteSparqlTool(
         const response = await client.sparql(request);
         return {
           success: true,
-          data: response.kind === "void"
-            ? null
-            : (response as { data?: unknown }).data,
+          data:
+            response.kind === "void"
+              ? null
+              : (response as { data?: unknown }).data,
         };
       } catch (error) {
         return {

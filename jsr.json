@@ -8,11 +8,16 @@
     "./import": "./src/import.ts",
     "./export": "./src/export.ts"
   },
-  "nodeModulesDir": "auto",
-  "publish": { "exclude": ["bun.lock", "bunfig.toml", "package.json"] },
-  "minimumDependencyAge": {
-    "age": "P1D",
-    "exclude": ["jsr:@worlds/sdk", "jsr:@wazoo/sparql-engine"]
+  "publish": {
+    "exclude": [
+      ".oxlintrc.json",
+      ".prettierignore",
+      "bun.lock",
+      "bunfig.toml",
+      "package.json",
+      "scripts/",
+      "tsconfig.json"
+    ]
   },
   "imports": {
     "ai": "npm:ai@^7.0.93",
@@ -22,28 +27,9 @@
     "@worlds/sdk/search-index": "jsr:@worlds/sdk@^0.9.0/search-index",
     "@worlds/sdk/quad-store": "jsr:@worlds/sdk@^0.9.0/quad-store",
     "@worlds/sdk/sparql-engine": "jsr:@worlds/sdk@^0.9.0/sparql-engine",
+    "@wazoo/sparql-engine": "jsr:@wazoo/sparql-engine@^0.4.1",
     "@wazoo/sparql-engine/parser": "jsr:@wazoo/sparql-engine@^0.4.1/parser",
     "@rdfjs/types": "npm:@rdfjs/types@^2.0.1"
-  },
-  "tasks": {
-    "check": "deno check src/mod.ts",
-    "fmt": "deno fmt",
-    "fmt:check": "deno fmt --check",
-    "lint": "deno lint",
-    "test": "deno test -A tests/",
-    "ci": "deno task fmt:check && deno task lint && deno task check && deno task test"
-  },
-  "fmt": {
-    "useTabs": false,
-    "lineWidth": 80,
-    "indentWidth": 2
-  },
-  "lint": {
-    "rules": {
-      "tags": [
-        "recommended"
-      ]
-    }
   },
   "compilerOptions": { "strict": true }
 }

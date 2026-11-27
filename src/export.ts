@@ -16,15 +16,18 @@ export interface ExportRdfInput {
 const ExportRdfInput: z.ZodType<ExportRdfInput, ExportRdfInput> = z.object({
   format: z.object({
     kind: z.literal("serialized").describe("Desired output format."),
-    contentType: z.string().optional().describe(
-      "The MIME type of the exported data. Usually 'text/turtle' or 'application/n-triples'.",
-    ),
+    contentType: z
+      .string()
+      .optional()
+      .describe(
+        "The MIME type of the exported data. Usually 'text/turtle' or 'application/n-triples'.",
+      ),
   }),
 });
 
-export function createExportRdfTool(
-  client: { export(request: ExportRequest): Promise<ExportResponse> },
-): WorldsTool<ExportRdfInput> {
+export function createExportRdfTool(client: {
+  export(request: ExportRequest): Promise<ExportResponse>;
+}): WorldsTool<ExportRdfInput> {
   return worldsTool({
     description: EXPORT_RDF_TOOL_DESCRIPTION,
     inputSchema: ExportRdfInput,

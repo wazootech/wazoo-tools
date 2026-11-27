@@ -17,9 +17,7 @@ test("normalizeName lowercases and collapses whitespace", () => {
 });
 
 test("cosineSimilarity is 1 for identical vectors and 0 for orthogonal ones", () => {
-  assert.ok(
-    Math.abs(cosineSimilarity([1, 0, 1], [1, 0, 1]) - 1) < 1e-12,
-  );
+  assert.ok(Math.abs(cosineSimilarity([1, 0, 1], [1, 0, 1]) - 1) < 1e-12);
   assert.deepStrictEqual(cosineSimilarity([1, 0], [0, 1]), 0);
 });
 
@@ -145,34 +143,34 @@ test("createResolveEntityTool exposes resolve, lookup, merge, and stats", async 
   const resolver = new EntityResolver();
   const tool = createResolveEntityTool(resolver);
 
-  const resolved = await tool.execute!(
+  const resolved = (await tool.execute!(
     {
       operation: "resolve",
       name: "Melanie",
       scopedUrn: "urn:person:s1/melanie",
     },
     { toolCallId: "1", messages: [], context: {} },
-  ) as { success: boolean; data?: { id: string } };
+  )) as { success: boolean; data?: { id: string } };
 
   assert.deepStrictEqual(resolved.success, true);
 
-  const looked = await tool.execute!(
+  const looked = (await tool.execute!(
     { operation: "lookup", id: resolved.data!.id },
     { toolCallId: "2", messages: [], context: {} },
-  ) as { success: boolean; data?: { name: string } };
+  )) as { success: boolean; data?: { name: string } };
   assert.deepStrictEqual(looked.success, true);
   assert.deepStrictEqual(looked.data!.name, "Melanie");
 
-  const stats = await tool.execute!(
+  const stats = (await tool.execute!(
     { operation: "stats" },
     { toolCallId: "3", messages: [], context: {} },
-  ) as { success: boolean; data?: { entities: number } };
+  )) as { success: boolean; data?: { entities: number } };
   assert.deepStrictEqual(stats.data!.entities, 1);
 
-  const bad = await tool.execute!(
+  const bad = (await tool.execute!(
     { operation: "resolve" },
     { toolCallId: "4", messages: [], context: {} },
-  ) as { success: boolean; error?: string };
+  )) as { success: boolean; error?: string };
   assert.deepStrictEqual(bad.success, false);
 });
 

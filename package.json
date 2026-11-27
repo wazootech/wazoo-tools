@@ -2,9 +2,23 @@
   "name": "@wazoo/tools",
   "private": true,
   "type": "module",
-  "description": "Bun toolchain manifest for @wazoo/tools. The published package is described by deno.json (jsr.json after the cutover).",
+  "description": "Bun toolchain manifest for @wazoo/tools. The published package is described by jsr.json; scripts/check-manifests.ts keeps the two in sync.",
   "packageManager": "bun@1.4.5",
+  "exports": {
+    ".": "./src/mod.ts",
+    "./sparql": "./src/sparql.ts",
+    "./search": "./src/search.ts",
+    "./import": "./src/import.ts",
+    "./export": "./src/export.ts"
+  },
   "scripts": {
+    "check": "bun check --no-script",
+    "check:manifests": "bun scripts/check-manifests.ts",
+    "ci": "bun run fmt:check && bun run lint && bun run check && bun run check:manifests && bun run test",
+    "fmt": "bun fmt --no-script",
+    "fmt:check": "bun fmt --no-script --check",
+    "lint": "oxlint --deny-warnings",
+    "publish:dry": "jsr publish --dry-run --allow-dirty",
     "test": "bun test"
   },
   "dependencies": {
@@ -16,6 +30,8 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
-    "@types/node": "^24.0.0"
+    "@types/node": "^24.0.0",
+    "jsr": "0.14.3",
+    "oxlint": "1.94.0"
   }
 }

@@ -65,11 +65,13 @@ export interface SearchToolInput {
   minScore?: number;
 }
 
-export const SearchToolInput: z.ZodType<SearchToolInput, SearchToolInput> = z
-  .object({
-    query: z.string().describe(
-      "Keyword, label, or natural-language query to search within the graph.",
-    ),
+export const SearchToolInput: z.ZodType<SearchToolInput, SearchToolInput> =
+  z.object({
+    query: z
+      .string()
+      .describe(
+        "Keyword, label, or natural-language query to search within the graph.",
+      ),
     include: z
       .object({
         subjects: z.array(z.string()).optional(),
@@ -86,12 +88,14 @@ export const SearchToolInput: z.ZodType<SearchToolInput, SearchToolInput> = z
       })
       .optional()
       .describe("Negative constraints to filter out matching triples."),
-    topK: z.number().optional().describe(
-      "Maximum number of results to return.",
-    ),
-    minScore: z.number().optional().describe(
-      "Minimum relevance score a result must meet to be included.",
-    ),
+    topK: z
+      .number()
+      .optional()
+      .describe("Maximum number of results to return."),
+    minScore: z
+      .number()
+      .optional()
+      .describe("Minimum relevance score a result must meet to be included."),
   });
 
 export function createSearchWorldTool(
@@ -110,9 +114,9 @@ export function createSearchWorldTool(
         const response = await client.search(
           rerankOptions
             ? {
-              ...request,
-              topK: rerankOptions.recall ?? request.topK ?? DEFAULT_RECALL,
-            }
+                ...request,
+                topK: rerankOptions.recall ?? request.topK ?? DEFAULT_RECALL,
+              }
             : request,
         );
 
@@ -151,9 +155,10 @@ export function createSearchWorldTool(
         } catch (rerankError) {
           // Graceful degradation: a reranker outage should degrade ordering,
           // not break the agent's tool call.
-          const message = rerankError instanceof Error
-            ? rerankError.message
-            : "Unknown rerank error";
+          const message =
+            rerankError instanceof Error
+              ? rerankError.message
+              : "Unknown rerank error";
           return {
             success: true,
             data: response,

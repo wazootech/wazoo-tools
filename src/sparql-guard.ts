@@ -20,8 +20,10 @@ export function isReadOnlySparql(text: string, baseIri?: string): boolean {
       type: string;
       queryType?: string;
     };
-    return READ_FORMS.has(parsed.type) &&
-      READ_QUERY_TYPES.has(parsed.queryType ?? "");
+    return (
+      READ_FORMS.has(parsed.type) &&
+      READ_QUERY_TYPES.has(parsed.queryType ?? "")
+    );
   } catch {
     return false;
   }

@@ -21,66 +21,60 @@ function asClient<T>(mock: unknown): T {
   return mock as T;
 }
 
-test(
-  "createExecuteSparqlTool rejects update queries when allowUpdates is false",
-  async () => {
-    const mockClient = asClient<{
-      sparql(request: { query: string }): Promise<SparqlResponse>;
-    }>({
-      sparql: () => Promise.resolve({ kind: "void" } as SparqlResponse),
-    });
+test("createExecuteSparqlTool rejects update queries when allowUpdates is false", async () => {
+  const mockClient = asClient<{
+    sparql(request: { query: string }): Promise<SparqlResponse>;
+  }>({
+    sparql: () => Promise.resolve({ kind: "void" } as SparqlResponse),
+  });
 
-    const sparqlTool = createExecuteSparqlTool(mockClient, {
-      allowUpdates: false,
-    });
-    const res = (await sparqlTool.execute!(
-      { query: "DELETE WHERE { ?s ?p ?o }" },
-      { toolCallId: "1", messages: [], context: {} },
-    )) as { success: boolean; error?: string };
-    assert.deepStrictEqual(res.success, false);
-    assert.deepStrictEqual(
-      res.error,
-      "SPARQL updates are disabled for this agent tool. Please execute read-only queries (SELECT, ASK, CONSTRUCT, DESCRIBE).",
-    );
-  },
-);
+  const sparqlTool = createExecuteSparqlTool(mockClient, {
+    allowUpdates: false,
+  });
+  const res = (await sparqlTool.execute!(
+    { query: "DELETE WHERE { ?s ?p ?o }" },
+    { toolCallId: "1", messages: [], context: {} },
+  )) as { success: boolean; error?: string };
+  assert.deepStrictEqual(res.success, false);
+  assert.deepStrictEqual(
+    res.error,
+    "SPARQL updates are disabled for this agent tool. Please execute read-only queries (SELECT, ASK, CONSTRUCT, DESCRIBE).",
+  );
+});
 
-test(
-  "createExecuteSparqlTool executes SELECT queries successfully",
-  async () => {
-    const mockClient = asClient<{
-      sparql(request: { query: string }): Promise<SparqlResponse>;
-    }>({
-      sparql: (_req: { query: string }) =>
-        Promise.resolve({
-          kind: "select",
-          data: {
-            head: { vars: ["s"] },
-            results: {
-              bindings: [{ s: { type: "uri", value: "http://example.org/1" } }],
-            },
+test("createExecuteSparqlTool executes SELECT queries successfully", async () => {
+  const mockClient = asClient<{
+    sparql(request: { query: string }): Promise<SparqlResponse>;
+  }>({
+    sparql: (_req: { query: string }) =>
+      Promise.resolve({
+        kind: "select",
+        data: {
+          head: { vars: ["s"] },
+          results: {
+            bindings: [{ s: { type: "uri", value: "http://example.org/1" } }],
           },
-        } as unknown as SparqlResponse),
-    });
+        },
+      } as unknown as SparqlResponse),
+  });
 
-    const sparqlTool = createExecuteSparqlTool(mockClient);
-    const res = (await sparqlTool.execute!(
-      { query: "SELECT * WHERE { ?s ?p ?o }" },
-      { toolCallId: "2", messages: [], context: {} },
-    )) as { success: boolean; data?: unknown };
-    assert.deepStrictEqual(res.success, true);
-    assert.deepStrictEqual(res.data, {
-      head: { vars: ["s"] },
-      results: {
-        bindings: [{ s: { type: "uri", value: "http://example.org/1" } }],
-      },
-    });
-  },
-);
+  const sparqlTool = createExecuteSparqlTool(mockClient);
+  const res = (await sparqlTool.execute!(
+    { query: "SELECT * WHERE { ?s ?p ?o }" },
+    { toolCallId: "2", messages: [], context: {} },
+  )) as { success: boolean; data?: unknown };
+  assert.deepStrictEqual(res.success, true);
+  assert.deepStrictEqual(res.data, {
+    head: { vars: ["s"] },
+    results: {
+      bindings: [{ s: { type: "uri", value: "http://example.org/1" } }],
+    },
+  });
+});
 
 test("createTools throws error if client is missing", () => {
-  assert.throws(
-    () => createTools({} as unknown as Parameters<typeof createTools>[0]),
+  assert.throws(() =>
+    createTools({} as unknown as Parameters<typeof createTools>[0]),
   );
 });
 
@@ -118,9 +112,11 @@ test("phase profiles expose only the capabilities for that phase", () => {
     search: () => Promise.resolve({ results: [] } as never),
     import: () => Promise.resolve(),
     export: () =>
-      Promise.resolve(
-        { kind: "serialized", data: "", contentType: "text/turtle" } as never,
-      ),
+      Promise.resolve({
+        kind: "serialized",
+        data: "",
+        contentType: "text/turtle",
+      } as never),
     reindex: () =>
       Promise.resolve({ processedQuadCount: 0, chunkRowCount: 0 } as never),
   });
@@ -135,11 +131,6 @@ test("phase profiles expose only the capabilities for that phase", () => {
   ]);
   assert.deepStrictEqual(
     Object.keys(createAdministrativeTools({ client })).sort(),
-    [
-      "executeSparql",
-      "exportRdf",
-      "importRdf",
-      "reindexWorld",
-    ],
+    ["executeSparql", "exportRdf", "importRdf", "reindexWorld"],
   );
 });
